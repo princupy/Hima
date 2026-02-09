@@ -320,5 +320,3 @@ Private/custom project. Add your preferred license before publishing.
   <img src="./docs/screenshots/help-premium.png" alt="Premium Help" width="420" />
 </p>
 
-> Place your screenshots in `docs/screenshots/` using the exact file names above.
-
