@@ -300,3 +300,22 @@ Most interactive panels include:
 
 ## License
 Private/custom project. Add your preferred license before publishing.
+
+
+## UI Showcase
+
+<p align="center">
+  <img src="./docs/screenshots/help-home.png" alt="Hima Help Home" width="900" />
+</p>
+
+<p align="center">
+  <img src="./docs/screenshots/avatar-viewer.png" alt="Avatar Viewer" width="420" />
+  <img src="./docs/screenshots/music-player-controls.png" alt="Music Player Controls" width="420" />
+</p>
+
+<p align="center">
+  <img src="./docs/screenshots/help-premium.png" alt="Premium Help" width="420" />
+</p>
+
+> Place your screenshots in `docs/screenshots/` using the exact file names above.
+
