@@ -1,4 +1,4 @@
-const { parsePremiumNodesFromEnv } = require("../lavalink/nodes");
+﻿const { parsePremiumNodesFromEnv } = require("../lavalink/nodes");
 
 function required(name) {
     const v = process.env[name];
@@ -35,6 +35,9 @@ function loadConfig() {
             voteHours: Number(process.env.VOTE_PREMIUM_HOURS || 12),
             voteLogChannelId: process.env.PREMIUM_VOTE_LOG_CHANNEL_ID || "",
             buyUrl: process.env.PREMIUM_BUY_URL || ""
+        },
+        guildLogs: {
+            channelId: process.env.GUILD_LOG_CHANNEL_ID || ""
         },
         defaults: {
             prefix: "H!"

@@ -1,4 +1,4 @@
-const {
+﻿const {
     Client,
     GatewayIntentBits,
     Partials
@@ -6,7 +6,7 @@ const {
 const { loadConfig } = require("./config");
 const { loadCommands } = require("./commands");
 const { registerReadyHandler } = require("./handlers/ready");
-const { registerGuildCreateHandler } = require("./handlers/guildCreate");
+const { registerGuildLifecycleHandler } = require("./handlers/guildLifecycle");
 const { registerMessageCreateHandler } = require("./handlers/messageCreate");
 const { registerPlaylistAutoloadHandler } = require("./playlists/autoloadHandler");
 const { MusicManager } = require("./music/manager");
@@ -70,7 +70,7 @@ class HimaBot {
         });
 
         registerReadyHandler(this);
-        registerGuildCreateHandler(this);
+        registerGuildLifecycleHandler(this);
         registerMessageCreateHandler(this);
         registerPlaylistAutoloadHandler(this);
 
@@ -110,4 +110,5 @@ class HimaBot {
 }
 
 module.exports = { HimaBot };
+
 

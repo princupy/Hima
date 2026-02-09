@@ -16,6 +16,8 @@ const NOW_PLAYING_UPDATE_INTERVAL_MS = Number(process.env.NOW_PLAYING_CARD_INTER
 const VOICE_JOIN_RETRIES = Number(process.env.VOICE_JOIN_RETRIES || 3);
 const IDLE_DISCONNECT_MS = 10_000;
 const VOICE_STATUS_ENABLED = String(process.env.VOICE_CHANNEL_STATUS_ENABLED || "true").toLowerCase() !== "false";
+const LAVALINK_RECONNECT_TRIES = Math.max(30, Number(process.env.LAVALINK_RECONNECT_TRIES || 999999));
+const LAVALINK_RECONNECT_INTERVAL = Math.max(1000, Number(process.env.LAVALINK_RECONNECT_INTERVAL_MS || 5000));
 
 class MusicManager {
     constructor({ client, lavalink, premiumLavalinkNodes = [], sendContainer }) {
@@ -52,8 +54,8 @@ class MusicManager {
         }));
 
         const cluster = new Shoukaku(this.connector, mapped, {
-            reconnectTries: 30,
-            reconnectInterval: 5000,
+            reconnectTries: LAVALINK_RECONNECT_TRIES,
+            reconnectInterval: LAVALINK_RECONNECT_INTERVAL,
             moveOnDisconnect: false,
             resume: false,
             voiceConnectionTimeout: 30000
@@ -115,6 +117,45 @@ class MusicManager {
         } catch {}
 
         return false;
+    }
+
+
+    getClusterNodeStats(cluster) {
+        let total = 0;
+        let online = 0;
+        if (!cluster) return { total, online, offline: 0 };
+
+        try {
+            for (const node of cluster.nodes.values()) {
+                total += 1;
+                if (this.isNodeUsable(node)) online += 1;
+            }
+        } catch {}
+
+        return { total, online, offline: Math.max(0, total - online) };
+    }
+
+    getNodeHealthSummary() {
+        const defaultStats = this.getClusterNodeStats(this.shoukaku);
+        const premiumStats = this.getClusterNodeStats(this.premiumShoukaku);
+        const total = defaultStats.total + premiumStats.total;
+        const online = defaultStats.online + premiumStats.online;
+        const offline = Math.max(0, total - online);
+
+        return {
+            overall: {
+                total,
+                online,
+                offline,
+                allOffline: total > 0 && online === 0
+            },
+            default: defaultStats,
+            premium: premiumStats
+        };
+    }
+
+    isAnyNodeOnline() {
+        return this.getNodeHealthSummary().overall.online > 0;
     }
 
     pickCluster(preferPremium = false) {
@@ -1153,69 +1194,3 @@ class MusicManager {
 }
 
 module.exports = { MusicManager };
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

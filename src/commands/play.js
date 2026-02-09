@@ -67,6 +67,13 @@ function stripSearchPrefix(q) {
     return q.replace(/^(ytsearch:|ytmsearch:|scsearch:)/i, "").trim();
 }
 
+function buildNodesOfflinePayload() {
+    return {
+        title: "Lavalink Nodes Offline",
+        description: "All music nodes are currently offline. Please try again in a few moments.",
+        footer: "Node reconnect is automatic"
+    };
+}
 function uniqueQueries(list) {
     const seen = new Set();
     const out = [];
@@ -171,6 +178,12 @@ module.exports = {
             return;
         }
 
+        const nodeHealth = bot.music.getNodeHealthSummary?.();
+        if (nodeHealth?.overall?.total > 0 && nodeHealth.overall.online === 0) {
+            await reply(buildNodesOfflinePayload());
+            return;
+        }
+
         const voice = message.member?.voice?.channel;
         if (!voice) {
             await reply({
@@ -198,10 +211,15 @@ module.exports = {
             try {
                 state = await bot.music.create(message.guild.id, voice.id, message.channel.id, shardId, message.author.id);
             } catch (error) {
+                const reason = String(error?.message || error);
+                if (/no lavalink node available/i.test(reason)) {
+                    await reply(buildNodesOfflinePayload());
+                    return;
+                }
                 await reply({
                     title: "Voice Join Failed",
                     description: "I could not connect to your voice channel.",
-                    fields: [{ name: "Reason", value: String(error?.message || error) }]
+                    fields: [{ name: "Reason", value: reason }]
                 });
                 return;
             }
@@ -285,10 +303,15 @@ module.exports = {
             }
 
             if (res.loadType === "error") {
+                const reason = String(res.exception?.message || "Unknown");
+                if (/no lavalink node available/i.test(reason)) {
+                    await reply(buildNodesOfflinePayload());
+                    return;
+                }
                 await reply({
                     title: "Search Failed",
                     description: "Lavalink could not load this query.",
-                    fields: [{ name: "Reason", value: String(res.exception?.message || "Unknown") }]
+                    fields: [{ name: "Reason", value: reason }]
                 });
                 return;
             }

@@ -90,8 +90,11 @@ Required:
 Common optional:
 - `LAVALINK_SECURE`
 - `LAVALINK_IDENTIFIER`
+- `LAVALINK_RECONNECT_TRIES` (default `999999`)
+- `LAVALINK_RECONNECT_INTERVAL_MS` (default `5000`)
 - `VOICE_CHANNEL_STATUS_ENABLED`
 - `TOPGG_TOKEN`
+- `GUILD_LOG_CHANNEL_ID` (join/leave server log channel id)
 - `VOTE_PREMIUM_HOURS` (default `12`)
 - `PREMIUM_VOTE_LOG_CHANNEL_ID`
 - `PREMIUM_BUY_URL`
@@ -318,4 +321,3 @@ Private/custom project. Add your preferred license before publishing.
 </p>
 
 > Place your screenshots in `docs/screenshots/` using the exact file names above.
-
