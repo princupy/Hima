@@ -1,0 +1,21 @@
+{
+    "name":  "hima",
+    "version":  "1.0.0",
+    "description":  "Hima Discord music bot (prefix + Lavalink + Supabase + Spotify + Components V2)",
+    "main":  "src/index.js",
+    "type":  "commonjs",
+    "scripts":  {
+                    "start":  "node src/index.js",
+                    "dev":  "node --watch src/index.js"
+                },
+    "engines":  {
+                    "node":  "\u003e=20.0.0"
+                },
+    "dependencies":  {
+                         "@supabase/supabase-js":  "^2.49.1",
+                         "discord.js":  "^14.18.0",
+                         "dotenv":  "^16.4.7",
+                         "musicard":  "^3.0.1",
+                         "shoukaku":  "^4.1.0"
+                     }
+}
