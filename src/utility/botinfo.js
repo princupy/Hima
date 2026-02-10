@@ -1,6 +1,7 @@
 const fs = require("node:fs");
 const path = require("node:path");
 const { MessageFlags } = require("discord.js");
+const { getUserMetrics } = require("../utils/userMetrics");
 
 const COMPONENTS_V2_FLAG = MessageFlags?.IsComponentsV2 ?? (1 << 15);
 const BOTINFO_VIEW_TTL_MS = 20 * 60 * 1000;
@@ -57,12 +58,14 @@ function getRuntimeStats(bot) {
     }
 
     const srcStats = walkSourceStats(srcDir);
+    const metrics = getUserMetrics(bot.client);
 
     return {
         uptimeSec: Math.floor(process.uptime()),
         memoryMb: Math.round(process.memoryUsage().rss / 1024 / 1024),
-        guilds: bot.client.guilds.cache.size,
-        users: bot.client.users.cache.size,
+        guilds: metrics.guilds,
+        users: metrics.totalUsers,
+        cachedUsers: metrics.cachedUsers,
         pingMs: Math.max(0, Math.round(bot.client.ws.ping || 0)),
         dependencyNames,
         dependencyCount: dependencyNames.length,
@@ -128,7 +131,7 @@ function renderPage({ bot, token, pageIndex, ownerId }) {
     const pages = [
         {
             title: "## Bot Info",
-            summary: `**Name:** ${botUser?.username || "Hima"}\n**Bot ID:** ${botUser?.id || "Unknown"}\n**Created:** ${botUser?.createdTimestamp ? `<t:${Math.floor(botUser.createdTimestamp / 1000)}:F>` : "Unknown"}\n**Guilds:** ${stats.guilds}\n**Users (cached):** ${stats.users}\n**Latency:** ${stats.pingMs}ms\n**Uptime:** ${formatDuration(stats.uptimeSec)}`,
+            summary: `**Name:** ${botUser?.username || "Hima"}\n**Bot ID:** ${botUser?.id || "Unknown"}\n**Created:** ${botUser?.createdTimestamp ? `<t:${Math.floor(botUser.createdTimestamp / 1000)}:F>` : "Unknown"}\n**Guilds:** ${stats.guilds}\n**Users (Total):** ${stats.users.toLocaleString()}\n**Users (Cached):** ${stats.cachedUsers.toLocaleString()}\n**Latency:** ${stats.pingMs}ms\n**Uptime:** ${formatDuration(stats.uptimeSec)}`,
             detail: "Page **1/3**\nUse Next for developer and technical pages."
         },
         {
@@ -252,3 +255,5 @@ module.exports = {
         return true;
     }
 };
+
+

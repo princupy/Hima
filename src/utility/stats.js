@@ -1,5 +1,6 @@
 const { MessageFlags } = require("discord.js");
 const { formatUptime } = require("../utils/format");
+const { getUserMetrics } = require("../utils/userMetrics");
 
 const COMPONENTS_V2_FLAG = MessageFlags?.IsComponentsV2 ?? (1 << 15);
 
@@ -18,8 +19,10 @@ module.exports = {
         const memMb = Math.round(process.memoryUsage().rss / 1024 / 1024);
         const uptime = formatUptime(process.uptime() * 1000);
         const wsPing = Number(bot.client.ws.ping || 0);
-        const guilds = bot.client.guilds.cache.size;
-        const users = bot.client.users.cache.size;
+        const metrics = getUserMetrics(bot.client);
+        const guilds = metrics.guilds;
+        const users = metrics.totalUsers;
+        const cachedUsers = metrics.cachedUsers;
         const avatar = bot.client.user?.displayAvatarURL?.({ extension: "png", size: 1024 }) || null;
 
         const nodeHealth = bot.music.getNodeHealthSummary?.() || {
@@ -43,7 +46,7 @@ module.exports = {
                 components: [
                     {
                         type: 10,
-                        content: `**Guilds:** ${guilds}\n**Users (cached):** ${users}\n**Uptime:** ${uptime}`
+                        content: `**Guilds:** ${guilds}\n**Users (Total):** ${users.toLocaleString()}\n**Users (Cached):** ${cachedUsers.toLocaleString()}\n**Uptime:** ${uptime}`
                     }
                 ],
                 ...(avatar
@@ -68,3 +71,5 @@ module.exports = {
         });
     }
 };
+
+
