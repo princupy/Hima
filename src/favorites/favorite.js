@@ -31,6 +31,44 @@ function getQueueTracks(bot, guildId) {
     return all;
 }
 
+function buildFavoriteSearchCandidates(item) {
+    const title = String(item?.title || "").trim();
+    const author = String(item?.author || "").trim();
+    const query = String(item?.query || "").trim();
+    const uri = String(item?.uri || "").trim();
+
+    const textSeed = [title, author].filter(Boolean).join(" ").trim();
+    const q = [];
+
+    if (textSeed) {
+        q.push(`ytmsearch:${textSeed}`);
+        q.push(`ytsearch:${textSeed}`);
+    }
+
+    if (title) {
+        q.push(`ytmsearch:${title}`);
+        q.push(`ytsearch:${title}`);
+    }
+
+    if (query && !/^https?:\/\//i.test(query)) {
+        q.push(`ytmsearch:${query}`);
+        q.push(`ytsearch:${query}`);
+    }
+
+    if (uri) q.push(uri);
+
+    return [...new Set(q.filter(Boolean))];
+}
+
+async function resolveFavoriteTrack(bot, guildId, item) {
+    const candidates = buildFavoriteSearchCandidates(item);
+    for (const candidate of candidates) {
+        const res = await bot.music.search(candidate, guildId).catch(() => null);
+        if (!res || res.loadType === "empty" || res.loadType === "error" || !res.tracks?.length) continue;
+        return res.tracks[0];
+    }
+    return null;
+}
 module.exports = {
     name: "favorite",
     aliases: ["fav", "favs"],
@@ -152,20 +190,20 @@ module.exports = {
 
                 let queued = 0;
                 for (let i = 0; i < items.length; i += 1) {
-                    const query = items[i].uri || items[i].query || items[i].title;
-                    if (!query) continue;
+                    const resolved = await resolveFavoriteTrack(bot, message.guild.id, items[i]);
+                    if (!resolved) continue;
+
                     if (i === 0) {
-                        await play.execute({ bot, message, args: [query], reply, prefix: "" });
+                        const firstQuery = resolved.uri || `${resolved.title} ${resolved.author}`;
+                        await play.execute({ bot, message, args: [firstQuery], reply, prefix: "" });
                         queued += 1;
-                    } else {
-                        const res = await bot.music.search(/^https?:\/\//i.test(query) ? query : `ytsearch:${query}`, message.guild.id).catch(() => null);
-                        if (!res || res.loadType === "empty" || res.loadType === "error" || !res.tracks?.length) continue;
-                        const t = res.tracks[0];
-                        t.requester = message.author.tag;
-                        t.requesterId = message.author.id;
-                        bot.music.enqueue(message.guild.id, [t]);
-                        queued += 1;
+                        continue;
                     }
+
+                    resolved.requester = message.author.tag;
+                    resolved.requesterId = message.author.id;
+                    bot.music.enqueue(message.guild.id, [resolved]);
+                    queued += 1;
                 }
 
                 await bot.music.playIfIdle(message.guild.id).catch(() => null);
@@ -213,3 +251,5 @@ module.exports = {
         });
     }
 };
+
+

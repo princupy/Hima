@@ -1016,9 +1016,35 @@ class MusicManager {
         return true;
     }
     bindPlayerEvents(state) {
-        const { player, guildId } = state;
+        const { player, guildId } = state;        const recoverFromPlaybackIssue = async (title, reason) => {
+            if (title === "Track Stuck" && state.current && !state.current.__stuckRecoveryTried) {
+                state.current.__stuckRecoveryTried = true;
 
-        const recoverFromPlaybackIssue = async (title, reason) => {
+                const refreshQuery = [state.current.title, state.current.author].filter(Boolean).join(" ").trim();
+                if (refreshQuery) {
+                    const refreshed = await this.search(`ytmsearch:${refreshQuery}`, guildId).catch(() => null);
+                    const fallbackTrack = Array.isArray(refreshed?.tracks) ? refreshed.tracks.find((t) => t?.encoded) : null;
+
+                    if (fallbackTrack?.encoded) {
+                        fallbackTrack.requester = state.current.requester;
+                        fallbackTrack.requesterId = state.current.requesterId;
+                        fallbackTrack.__stuckRecoveryTried = true;
+                        state.current = fallbackTrack;
+                        state.isPaused = false;
+
+                        try {
+                            await state.player.playTrack({ track: { encoded: fallbackTrack.encoded } });
+                            await this.sendContainer(state.textChannelId, {
+                                title: "Playback Recovered",
+                                description: "Source refreshed automatically. Continuing playback.",
+                                sections: [{ title: "Track", content: fallbackTrack.uri ? `[${fallbackTrack.title}](${fallbackTrack.uri})` : fallbackTrack.title }]
+                            });
+                            return;
+                        } catch {}
+                    }
+                }
+            }
+
             this.clearNowPlayingUpdates(guildId, { deleteMessage: true });
             await this.sendContainer(state.textChannelId, {
                 title,
@@ -1414,6 +1440,7 @@ class MusicManager {
 }
 
 module.exports = { MusicManager };
+
 
 
 
