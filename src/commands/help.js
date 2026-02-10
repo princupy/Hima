@@ -53,7 +53,7 @@ const CATEGORIES = [
         key: "music",
         label: "Music",
         description: "Playback, queue and voice control commands.",
-        commands: ["play", "pause", "resume", "skip", "stop", "disconnect", "queue", "nowplaying", "volume", "loop", "lyrics"]
+        commands: ["play", "pause", "resume", "skip", "stop", "disconnect", "queue", "nowplaying", "volume", "loop", "lyrics", "autoplay"]
     },
     {
         key: "filters",
@@ -426,11 +426,3 @@ module.exports = {
         return false;
     }
 };
-
-
-
-
-
-
-
-

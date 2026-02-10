@@ -5,7 +5,8 @@ const {
     isGuildPaidPremiumActive,
     isGuildAnyPremiumRowActive,
     getActiveGuildCardTheme,
-    getGuild247Settings
+    getGuild247Settings,
+    getGuildAutoplaySettings
 } = require("../premium/profile");
 
 function ts(value, style = "F") {
@@ -31,10 +32,18 @@ module.exports = {
         const paidActive = isGuildPaidPremiumActive(row);
         const anyPremium = isGuildAnyPremiumRowActive(row);
         const effectiveTheme = await getActiveGuildCardTheme(guildId).catch(() => "ease");
+
         const keep247 = await getGuild247Settings(guildId).catch(() => ({
             configured: false,
             enabled: false,
             channelId: null,
+            byUserId: null
+        }));
+
+        const autoplay = await getGuildAutoplaySettings(guildId).catch(() => ({
+            configured: false,
+            enabled: false,
+            premiumActive: false,
             byUserId: null
         }));
 
@@ -69,6 +78,10 @@ module.exports = {
                 { name: "24/7 Live", value: keep247.enabled ? "On" : "Off" },
                 { name: "24/7 Channel", value: keep247.channelId ? `<#${keep247.channelId}>` : "Not set" },
                 { name: "24/7 By", value: keep247.byUserId ? `<@${keep247.byUserId}>` : "N/A" },
+
+                { name: "Autoplay Configured", value: autoplay.configured ? "Yes" : "No" },
+                { name: "Autoplay Live", value: autoplay.enabled ? "On" : "Off" },
+                { name: "Autoplay By", value: autoplay.byUserId ? `<@${autoplay.byUserId}>` : "N/A" },
 
                 { name: "Voice Connected", value: player ? "Yes" : "No" },
                 { name: "Now Playing", value: player?.current?.title || "Nothing" },

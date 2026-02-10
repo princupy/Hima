@@ -6,6 +6,9 @@ const {
     getActiveGuildCardTheme,
     getGuild247Settings,
     disableGuild247,
+    getGuildAutoplaySettings,
+    setGuildAutoplaySettings,
+    disableGuildAutoplay,
     hasUserPaidPremiumAccess,
     isVotePremiumActive
 } = require("../premium/profile");
@@ -311,6 +314,216 @@ class MusicManager {
 
         return Boolean(settings.enabled);
     }
+
+    async getAutoplayStatus(guildId) {
+        return getGuildAutoplaySettings(guildId).catch(() => ({
+            enabled: false,
+            configured: false,
+            premiumActive: false,
+            byUserId: null
+        }));
+    }
+
+    async setAutoplay(guildId, { enabled, userId = null }) {
+        return setGuildAutoplaySettings(guildId, { enabled, userId });
+    }
+
+
+    normalizeTrackText(value) {
+        return String(value || "")
+            .toLowerCase()
+            .replace(/\([^)]*\)|\[[^\]]*\]/g, " ")
+            .replace(/[^a-z0-9\s]/g, " ")
+            .replace(/\s+/g, " ")
+            .trim();
+    }
+
+    normalizeTrackUri(value) {
+        return String(value || "")
+            .toLowerCase()
+            .replace(/[?&](si|feature|pp|t)=[^&#]+/g, "")
+            .replace(/#.*/, "")
+            .trim();
+    }
+
+    isSameTrack(a, b) {
+        if (!a || !b) return false;
+
+        const aId = String(a.identifier || "").trim();
+        const bId = String(b.identifier || "").trim();
+        if (aId && bId && aId === bId) return true;
+
+        const aUri = this.normalizeTrackUri(a.uri);
+        const bUri = this.normalizeTrackUri(b.uri);
+        if (aUri && bUri && aUri === bUri) return true;
+
+        const aTitle = this.normalizeTrackText(a.title);
+        const bTitle = this.normalizeTrackText(b.title);
+        const aAuthor = this.normalizeTrackText(a.author);
+        const bAuthor = this.normalizeTrackText(b.author);
+
+        if (aTitle && bTitle && aTitle === bTitle && aAuthor && bAuthor && aAuthor === bAuthor) {
+            return true;
+        }
+
+        return false;
+    }
+
+    makeTrackFingerprint(track) {
+        if (!track) return "";
+        const id = String(track.identifier || "").trim();
+        if (id) return `id:${id}`;
+
+        const uri = this.normalizeTrackUri(track.uri);
+        if (uri) return `uri:${uri}`;
+
+        const title = this.normalizeTrackText(track.title);
+        const author = this.normalizeTrackText(track.author);
+        if (title || author) return `meta:${author}|${title}`;
+        return "";
+    }
+
+    shuffleArray(list) {
+        const copy = [...list];
+        for (let i = copy.length - 1; i > 0; i -= 1) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [copy[i], copy[j]] = [copy[j], copy[i]];
+        }
+        return copy;
+    }
+
+    looksDevotionalTrack(track) {
+        const hay = `${track?.title || ""} ${track?.author || ""}`.toLowerCase();
+        const blocked = [
+            "bhajan",
+            "aarti",
+            "aartii",
+            "devotional",
+            "bhakti",
+            "mantra",
+            "chalisa",
+            "kirtan",
+            "jagrata",
+            "mata",
+            "hanuman",
+            "shiv",
+            "krishna",
+            "ram dhun",
+            "satsang"
+        ];
+        return blocked.some((word) => hay.includes(word));
+    }
+
+    looksTooOldTrack(track) {
+        const title = String(track?.title || "");
+        const yearMatch = title.match(/\b(19\d{2}|20\d{2})\b/);
+        if (!yearMatch) return false;
+        const year = Number(yearMatch[1]);
+        const currentYear = new Date().getFullYear();
+        return Number.isFinite(year) && year < (currentYear - 2);
+    }
+
+    buildHindiAutoplayQueries(seedTrack) {
+        const currentYear = new Date().getFullYear();
+        const previousYear = currentYear - 1;
+        const author = String(seedTrack?.author || "").trim();
+
+        const baseQueries = [
+            `ytmsearch:latest hindi songs ${currentYear}`,
+            `ytsearch:latest hindi songs ${currentYear}`,
+            `ytmsearch:new hindi songs ${currentYear}`,
+            `ytsearch:new hindi songs ${currentYear}`,
+            `ytmsearch:trending hindi songs ${currentYear}`,
+            `ytsearch:trending hindi songs ${currentYear}`,
+            `ytmsearch:new bollywood songs ${currentYear}`,
+            `ytsearch:new bollywood songs ${currentYear}`,
+            `ytmsearch:latest hindi songs ${previousYear} ${currentYear}`,
+            `ytsearch:latest hindi songs ${previousYear} ${currentYear}`,
+            `ytmsearch:hindi pop songs ${currentYear}`,
+            `ytsearch:hindi pop songs ${currentYear}`
+        ];
+
+        const artistQueries = author
+            ? [
+                `ytmsearch:${author} latest hindi songs`,
+                `ytsearch:${author} latest hindi songs`,
+                `ytmsearch:${author} new song ${currentYear}`,
+                `ytsearch:${author} new song ${currentYear}`
+            ]
+            : [];
+
+        return this.shuffleArray([...artistQueries, ...baseQueries]);
+    }
+
+    async tryAutoplayEnqueue(state) {
+        const settings = await getGuildAutoplaySettings(state.guildId).catch(() => null);
+        if (!settings?.configured) return false;
+
+        if (!settings.premiumActive) {
+            await disableGuildAutoplay(state.guildId).catch(() => null);
+            await this.sendContainer(state.textChannelId, {
+                title: "Autoplay Disabled",
+                description: "Premium expired. Autoplay has been turned off automatically."
+            }).catch(() => null);
+            return false;
+        }
+
+        if (!settings.enabled) return false;
+
+        const seed = state.lastSeedTrack;
+        if (!seed) return false;
+        const seedKey = this.makeTrackFingerprint(seed);
+        const currentKey = this.makeTrackFingerprint(state.current);
+        const recentKeys = new Set(Array.isArray(state.autoplayRecentKeys) ? state.autoplayRecentKeys : []);
+
+        const queries = this.buildHindiAutoplayQueries(seed);
+        for (const q of queries) {
+            const res = await this.search(q, state.guildId).catch(() => null);
+            const list = this.shuffleArray(Array.isArray(res?.tracks) ? res.tracks : []);
+            const pick = list.find((t) => {
+                if (!t?.encoded) return false;
+                if (this.isSameTrack(t, seed) || this.isSameTrack(t, state.current)) return false;
+                if (this.looksDevotionalTrack(t)) return false;
+                if (this.looksTooOldTrack(t)) return false;
+                const key = this.makeTrackFingerprint(t);
+                if (!key) return true;
+                if (key === seedKey || key === currentKey) return false;
+                if (recentKeys.has(key)) return false;
+                return true;
+            });
+            if (!pick) continue;
+
+            pick.requester = "Autoplay";
+            pick.requesterId = settings.byUserId || null;
+            this.enqueue(state.guildId, [pick]);
+
+            const pickedKey = this.makeTrackFingerprint(pick);
+            if (pickedKey) {
+                const updated = Array.isArray(state.autoplayRecentKeys) ? state.autoplayRecentKeys : [];
+                updated.push(pickedKey);
+                state.autoplayRecentKeys = updated.slice(-20);
+            }
+
+            await this.sendContainer(state.textChannelId, {
+                title: "Autoplay",
+                description: "Queue ended, added a similar track automatically.",
+                sections: [
+                    { title: "Now Added", content: pick.uri ? `[${pick.title}](${pick.uri})` : pick.title },
+                    { title: "Based On", content: seed.uri ? `[${seed.title}](${seed.uri})` : seed.title }
+                ]
+            }).catch(() => null);
+
+            return true;
+        }
+
+        await this.sendContainer(state.textChannelId, {
+            title: "Autoplay",
+            description: "No similar tracks found right now."
+        }).catch(() => null);
+
+        return false;
+    }
+
     parseEmoji(raw) {
         const value = String(raw || "").trim();
         if (!value) return null;
@@ -972,6 +1185,12 @@ class MusicManager {
         if (!next) {
             this.clearNowPlayingUpdates(guildId, { deleteMessage: true });
 
+            const autoAdded = await this.tryAutoplayEnqueue(state).catch(() => false);
+            if (autoAdded) {
+                await this.playNext(guildId);
+                return;
+            }
+
             const keep247 = await this.shouldKeep247Live(state).catch(() => false);
             if (keep247) {
                 await this.sendContainer(state.textChannelId, {
@@ -994,6 +1213,7 @@ class MusicManager {
         this.clearIdleDisconnectTimer(state);
 
         state.current = next;
+        state.lastSeedTrack = { ...next };
         state.isPaused = false;
 
         try {
@@ -1194,3 +1414,9 @@ class MusicManager {
 }
 
 module.exports = { MusicManager };
+
+
+
+
+
+

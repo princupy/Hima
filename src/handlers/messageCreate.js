@@ -16,6 +16,7 @@ const MUSIC_LOCK_COMMANDS = new Set([
     "volume",
     "loop",
     "lyrics",
+    "autoplay",
     "filter",
     "spplay"
 ]);

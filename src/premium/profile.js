@@ -219,6 +219,9 @@ async function ensureGuildVoteRow(guildId) {
         keep_247_channel_id: null,
         keep_247_by_user_id: null,
         keep_247_updated_at: null,
+        autoplay_enabled: false,
+        autoplay_by_user_id: null,
+        autoplay_updated_at: null,
         created_at: nowIso(),
         updated_at: nowIso()
     };
@@ -378,6 +381,43 @@ async function listActive247GuildRows() {
     return Array.isArray(data) ? data : [];
 }
 
+
+async function getGuildAutoplaySettings(guildId) {
+    const row = await getGuildVoteRow(guildId).catch(() => null);
+    if (!row) {
+        return {
+            enabled: false,
+            configured: false,
+            premiumActive: false,
+            byUserId: null,
+            row: null
+        };
+    }
+
+    const premiumActive = isGuildAnyPremiumRowActive(row);
+    const configured = Boolean(row.autoplay_enabled);
+
+    return {
+        enabled: configured && premiumActive,
+        configured,
+        premiumActive,
+        byUserId: row.autoplay_by_user_id || null,
+        row
+    };
+}
+
+async function setGuildAutoplaySettings(guildId, { enabled, userId = null }) {
+    return updateGuildVoteRow(guildId, {
+        autoplay_enabled: Boolean(enabled),
+        autoplay_by_user_id: enabled ? (userId || null) : null,
+        autoplay_updated_at: nowIso()
+    });
+}
+
+async function disableGuildAutoplay(guildId) {
+    return setGuildAutoplaySettings(guildId, { enabled: false });
+}
+
 module.exports = {
     isActiveVote,
     isGuildPaidPremiumActive,
@@ -405,5 +445,8 @@ module.exports = {
     setGuild247Settings,
     disableGuild247,
     listActive247GuildRows,
+    getGuildAutoplaySettings,
+    setGuildAutoplaySettings,
+    disableGuildAutoplay,
     cacheDelete
 };

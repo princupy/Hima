@@ -68,6 +68,15 @@ alter table public.guild_vote_premium
 
 alter table public.guild_vote_premium
     add column if not exists keep_247_updated_at timestamptz null;
+alter table public.guild_vote_premium
+    add column if not exists autoplay_enabled boolean not null default false;
+
+alter table public.guild_vote_premium
+    add column if not exists autoplay_by_user_id text null;
+
+alter table public.guild_vote_premium
+    add column if not exists autoplay_updated_at timestamptz null;
+
 
 create index if not exists idx_guild_vote_premium_until
     on public.guild_vote_premium (vote_until);
