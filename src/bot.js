@@ -1,4 +1,4 @@
-﻿const {
+const {
     Client,
     GatewayIntentBits,
     Partials
@@ -74,6 +74,14 @@ class HimaBot {
         registerMessageCreateHandler(this);
         registerPlaylistAutoloadHandler(this);
 
+
+        this.client.on("voiceStateUpdate", (oldState, newState) => {
+            try {
+                this.music.updateVoiceState(oldState, newState);
+            } catch (error) {
+                console.error("[VoiceState AutoPause Error]", error?.message || error);
+            }
+        });
         this.client.on("interactionCreate", async (interaction) => {
             try {
                 if (!(interaction.isButton() || interaction.isStringSelectMenu())) return;
@@ -110,5 +118,6 @@ class HimaBot {
 }
 
 module.exports = { HimaBot };
+
 
 

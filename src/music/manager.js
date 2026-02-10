@@ -85,10 +85,84 @@ class MusicManager {
             console.warn(`[Lavalink:${label}] Node reconnecting (${name}) - retries left: ${reconnectsLeft}`);
         });
     }
-    init() {}
+    init(botUserId) {
+        this.botUserId = botUserId;
+    }
 
-    updateVoiceState() {}
+    countHumanMembers(channel) {
+        if (!channel?.members) return 0;
+        let count = 0;
+        for (const member of channel.members.values()) {
+            if (!member.user?.bot) count += 1;
+        }
+        return count;
+    }
 
+    getVoiceChannelForState(state) {
+        const guild = this.client.guilds.cache.get(state.guildId);
+        if (!guild) return null;
+        return guild.channels.cache.get(state.voiceChannelId) || null;
+    }    async evaluateAutoPauseResume(guildId) {
+        const state = this.states.get(guildId);
+        if (!state?.player || !state.voiceChannelId) return;
+
+        const voiceChannel = this.getVoiceChannelForState(state);
+        if (!voiceChannel || !voiceChannel.isVoiceBased()) return;
+
+        const humans = this.countHumanMembers(voiceChannel);
+
+        if (humans === 0) {
+            if (state.current && !state.isPaused) {
+                await state.player.setPaused(true).catch(() => null);
+                state.isPaused = true;
+                state.autoPausedByEmpty = true;
+
+                await this.sendContainer(state.textChannelId, {
+                    title: "Auto Paused",
+                    description: "No users in voice channel. Playback paused automatically.",
+                    footer: "Join the channel to auto-resume"
+                }).catch(() => null);
+
+                await this.refreshNowPlayingCard(guildId).catch(() => null);
+            }
+            return;
+        }
+
+        if (state.current && state.isPaused && state.autoPausedByEmpty) {
+            await state.player.setPaused(false).catch(() => null);
+            state.isPaused = false;
+            state.autoPausedByEmpty = false;
+
+            await this.sendContainer(state.textChannelId, {
+                title: "Auto Resumed",
+                description: "A user joined voice channel. Resuming playback from where it paused."
+            }).catch(() => null);
+
+            await this.refreshNowPlayingCard(guildId).catch(() => null);
+        }
+    }
+
+    updateVoiceState(oldState, newState) {
+        const guildId = newState?.guild?.id || oldState?.guild?.id;
+        if (!guildId) return;
+
+        const state = this.states.get(guildId);
+        if (!state) return;
+
+        const oldChannelId = oldState?.channelId || null;
+        const newChannelId = newState?.channelId || null;
+        const changedUserId = newState?.id || oldState?.id;
+
+        if (this.botUserId && changedUserId === this.botUserId) {
+            state.voiceChannelId = newChannelId || null;
+        }
+
+        if (oldChannelId !== state.voiceChannelId && newChannelId !== state.voiceChannelId) return;
+
+        setTimeout(() => {
+            this.evaluateAutoPauseResume(guildId).catch(() => null);
+        }, 350);
+    }
     warnOnce(key, message, ttlMs = 20000) {
         const now = Date.now();
         const at = this.warnAt.get(key) || 0;
@@ -250,6 +324,7 @@ class MusicManager {
             volume: 100,
             loopMode: "off",
             isPaused: false,
+            autoPausedByEmpty: false,
             skipRequested: false,
             disconnectTimer: null,
             manualDisconnect: false,
@@ -1031,6 +1106,7 @@ class MusicManager {
                         fallbackTrack.__stuckRecoveryTried = true;
                         state.current = fallbackTrack;
                         state.isPaused = false;
+        state.autoPausedByEmpty = false;
 
                         try {
                             await state.player.playTrack({ track: { encoded: fallbackTrack.encoded } });
@@ -1054,6 +1130,7 @@ class MusicManager {
             state.skipRequested = false;
             state.current = null;
             state.isPaused = false;
+        state.autoPausedByEmpty = false;
             await this.playNext(guildId);
         };
 
@@ -1078,6 +1155,7 @@ class MusicManager {
             state.skipRequested = false;
             state.current = null;
             state.isPaused = false;
+        state.autoPausedByEmpty = false;
             this.clearNowPlayingUpdates(guildId, { deleteMessage: true });
             await this.playNext(guildId);
         });
@@ -1241,6 +1319,7 @@ class MusicManager {
         state.current = next;
         state.lastSeedTrack = { ...next };
         state.isPaused = false;
+        state.autoPausedByEmpty = false;
 
         try {
             await state.player.playTrack({
@@ -1255,6 +1334,7 @@ class MusicManager {
             });
             state.current = null;
             state.isPaused = false;
+        state.autoPausedByEmpty = false;
             this.clearNowPlayingUpdates(guildId, { deleteMessage: true });
             await this.playNext(guildId);
         }
@@ -1276,6 +1356,7 @@ class MusicManager {
         if (!state || !state.current || state.isPaused) return false;
         await state.player.setPaused(true);
         state.isPaused = true;
+        state.autoPausedByEmpty = false;
         return true;
     }
 
@@ -1284,6 +1365,7 @@ class MusicManager {
         if (!state || !state.current || !state.isPaused) return false;
         await state.player.setPaused(false);
         state.isPaused = false;
+        state.autoPausedByEmpty = false;
         return true;
     }
 
@@ -1309,6 +1391,7 @@ class MusicManager {
         state.skipRequested = true;
         state.current = null;
         state.isPaused = false;
+        state.autoPausedByEmpty = false;
         this.clearNowPlayingUpdates(guildId, { deleteMessage: true });
         this.clearIdleDisconnectTimer(state);
 
@@ -1440,6 +1523,11 @@ class MusicManager {
 }
 
 module.exports = { MusicManager };
+
+
+
+
+
 
 
 
