@@ -23,6 +23,7 @@ const FILTER_HELP_ITEMS = [
     { name: "filter earrape", usage: "filter earrape", aliases: [], description: "Very loud aggressive EQ profile." },
     { name: "filter radio", usage: "filter radio", aliases: [], description: "Telephone/radio narrow-band effect." }
 ];
+
 const FAVORITE_HELP_ITEMS = [
     { name: "favorite add", usage: "favorite add [query/url]", aliases: ["fav add"], description: "Save current playing song or provided query to favorites." },
     { name: "favorite list", usage: "favorite list", aliases: ["fav list", "favs"], description: "Show your saved favorites list." },
@@ -31,6 +32,7 @@ const FAVORITE_HELP_ITEMS = [
     { name: "favorite addqueue", usage: "favorite addqueue", aliases: ["favorite queueadd"], description: "Save current queue tracks into favorites." },
     { name: "favorite remove", usage: "favorite remove <index>", aliases: ["fav remove", "favorite delete"], description: "Remove a song from favorites by index." }
 ];
+
 const PLAYLIST_HELP_ITEMS = [
     { name: "playlist create", usage: "playlist create [user|shared] <name>", aliases: [], description: "Create a cloud playlist." },
     { name: "playlist list", usage: "playlist list [user|shared]", aliases: [], description: "List your user/shared playlists." },
@@ -48,60 +50,83 @@ const PLAYLIST_HELP_ITEMS = [
     { name: "playlist autoload", usage: "playlist autoload <name|off>", aliases: ["playlist default"], description: "Auto-load default playlist on VC join." }
 ];
 
+const CATEGORY_GROUPS = {
+    main: {
+        key: "main",
+        label: "__Main Commands__",
+        description: "Music-focused systems"
+    },
+    side: {
+        key: "side",
+        label: "__Extra Commands__",
+        description: "Management and utility systems"
+    }
+};
+
 const CATEGORIES = [
     {
         key: "music",
         label: "Music",
+        group: "main",
         description: "Playback, queue and voice control commands.",
         commands: ["play", "pause", "resume", "skip", "stop", "disconnect", "queue", "nowplaying", "volume", "loop", "lyrics", "autoplay"]
     },
     {
         key: "filters",
         label: "Filters",
+        group: "main",
         description: "Audio filter presets and realtime effects.",
         commands: ["filter"]
     },
     {
-        key: "settings",
-        label: "Settings",
-        description: "Guild configuration commands.",
-        commands: ["prefix", "musicchannel", "config"]
-    },
-    {
-        key: "general",
-        label: "General",
-        description: "Profile and AFK convenience commands.",
-        commands: ["avatar", "afk"]
-    },
-    {
-        key: "utility",
-        label: "Utility",
-        description: "General utility and bot info.",
-        commands: ["help", "ping", "stats", "uptime", "botinfo", "serverstats", "voiceinfo", "shardinfo", "system", "support", "invite"]
-    },
-    {
         key: "spotify",
         label: "Spotify",
+        group: "main",
         description: "Connect your Spotify profile, list playlists and play directly.",
         commands: ["spconnect", "spstatus", "spplaylists", "spplay", "spdisconnect"]
     },
     {
+        key: "favorites",
+        label: "Favorites",
+        group: "main",
+        description: "Premium personal favorites list and quick playback.",
+        commands: ["favorite"]
+    },
+    {
         key: "playlists",
         label: "Playlists",
+        group: "main",
         description: "Premium cloud playlists with autosync, import/export and autoload.",
         commands: ["playlist"]
     },
     {
         key: "premium",
         label: "Premium",
+        group: "main",
         description: "Premium system: vote or buy access, musicard and prefix controls.",
         commands: ["vote", "mypremium", "myprefix", "mycard", "247", "premiumtoken", "premiumredeem"]
-    },    {
-        key: "favorites",
-        label: "Favorites",
-        description: "Premium personal favorites list and quick playback.",
-        commands: ["favorite"]
     },
+    {
+        key: "general",
+        label: "General",
+        group: "side",
+        description: "Profile and AFK convenience commands.",
+        commands: ["avatar", "afk", "membercount"]
+    },
+    {
+        key: "settings",
+        label: "Settings",
+        group: "side",
+        description: "Guild configuration commands.",
+        commands: ["prefix", "musicchannel", "config"]
+    },
+    {
+        key: "utility",
+        label: "Utility",
+        group: "side",
+        description: "General utility and bot info.",
+        commands: ["help", "ping", "stats", "uptime", "botinfo", "serverstats", "voiceinfo", "shardinfo", "system", "support", "invite"]
+    }
 ];
 
 function cleanupViews() {
@@ -115,16 +140,24 @@ function createToken() {
     return Math.random().toString(36).slice(2, 10);
 }
 
-function listCategoryOptions() {
-    return CATEGORIES.map((c) => ({
+function getCategory(key) {
+    return CATEGORIES.find((x) => x.key === key) || CATEGORIES[0];
+}
+
+function listCategoriesByGroup(groupKey) {
+    return CATEGORIES.filter((x) => x.group === groupKey);
+}
+
+function listCategoryOptions(groupKey) {
+    return listCategoriesByGroup(groupKey).map((c) => ({
         label: c.label,
         value: c.key,
         description: c.description
     }));
 }
 
-function getCategory(key) {
-    return CATEGORIES.find((x) => x.key === key) || CATEGORIES[0];
+function renderCategoryList(groupKey) {
+    return listCategoriesByGroup(groupKey).map((x, i) => `> ${i + 1}. ${x.label}`).join("\n");
 }
 
 function getExistingCommands(bot, names) {
@@ -132,16 +165,14 @@ function getExistingCommands(bot, names) {
 }
 
 function getCategoryEntries(bot, category) {
-    if (category.key === "playlists") {
-        return PLAYLIST_HELP_ITEMS;
-    }
-    if (category.key === "filters") {
-        return FILTER_HELP_ITEMS;
-    }
-    if (category.key === "favorites") {
-        return FAVORITE_HELP_ITEMS;
-    }
+    if (category.key === "playlists") return PLAYLIST_HELP_ITEMS;
+    if (category.key === "filters") return FILTER_HELP_ITEMS;
+    if (category.key === "favorites") return FAVORITE_HELP_ITEMS;
     return getExistingCommands(bot, category.commands);
+}
+
+function getLiveTotalCommands(bot) {
+    return new Set((bot.commands || []).map((c) => c.name)).size;
 }
 
 function formatCommandDetail(command, prefix, number) {
@@ -157,9 +188,8 @@ function formatCommandDetail(command, prefix, number) {
 }
 
 function buildHomePayload({ bot, prefix, token, selectedBy }) {
-    const totalCommands = bot.commands.length;
+    const totalCommands = getLiveTotalCommands(bot);
     const avatarUrl = bot.client.user?.displayAvatarURL?.({ extension: "png", size: 1024 }) || null;
-    const categoriesVertical = CATEGORIES.map((x, i) => `${i + 1}. ${x.label}`).join("\n");
 
     const children = [
         { type: 10, content: "## Hima Help" },
@@ -182,20 +212,31 @@ function buildHomePayload({ bot, prefix, token, selectedBy }) {
                 : {})
         },
         { type: 14, divider: true, spacing: 1 },
-        {
-            type: 10,
-            content: `**Prefix:** \`${prefix}\`\n**Total Commands:** ${totalCommands}\n\n**Categories**\n${categoriesVertical}`
-        },
+        { type: 10, content: `**Prefix:** \`${prefix}\`\n**Total Commands:** ${totalCommands}` },
         { type: 14, divider: true, spacing: 1 },
-        { type: 10, content: "Select a category from dropdown to view commands." },
+        { type: 10, content: `**${CATEGORY_GROUPS.main.label}**\n${renderCategoryList("main")}` },
+        { type: 10, content: `**${CATEGORY_GROUPS.side.label}**\n${renderCategoryList("side")}` },
+        { type: 14, divider: true, spacing: 1 },
+        { type: 10, content: "Select category from Main or Side dropdown to view commands." },
         {
             type: 1,
             components: [
                 {
                     type: 3,
-                    custom_id: `help_category:${token}`,
-                    placeholder: "Select Category",
-                    options: listCategoryOptions()
+                    custom_id: `help_category_main:${token}`,
+                    placeholder: "Select Main Category",
+                    options: listCategoryOptions("main")
+                }
+            ]
+        },
+        {
+            type: 1,
+            components: [
+                {
+                    type: 3,
+                    custom_id: `help_category_side:${token}`,
+                    placeholder: "Select Side Category",
+                    options: listCategoryOptions("side")
                 }
             ]
         },
@@ -220,9 +261,9 @@ function buildCategoryPayload({ bot, prefix, categoryKey, page, token, selectedB
     const children = [
         { type: 10, content: "## Hima Help" },
         { type: 14, divider: true, spacing: 1 },
-        { type: 10, content: `**Category:** ${category.label}\n${category.description}` },
+        { type: 10, content: `**Group:** ${CATEGORY_GROUPS[category.group]?.label || "Category"}\n**Selected:** ${category.label}\n${category.description}` },
         ...(category.key === "premium"
-            ? [{ type: 10, content: "**Available Musicard Themes**\n1. `ease`\n2. `glass`\n3. `neon`\n4. `sunset`\n5. `ocean`\n6. `mono`" }, { type: 14, divider: true, spacing: 1 }]
+            ? [{ type: 10, content: "**Available Musicard Themes**\n1. \`ease\`\n2. \`glass\`\n3. \`neon\`\n4. \`sunset\`\n5. \`ocean\`\n6. \`mono\`" }, { type: 14, divider: true, spacing: 1 }]
             : []),
         { type: 14, divider: true, spacing: 1 }
     ];
@@ -270,9 +311,21 @@ function buildCategoryPayload({ bot, prefix, categoryKey, page, token, selectedB
         components: [
             {
                 type: 3,
-                custom_id: `help_category:${token}`,
-                placeholder: "Switch Category",
-                options: listCategoryOptions()
+                custom_id: `help_category_main:${token}`,
+                placeholder: "Switch Main Category",
+                options: listCategoryOptions("main")
+            }
+        ]
+    });
+
+    children.push({
+        type: 1,
+        components: [
+            {
+                type: 3,
+                custom_id: `help_category_side:${token}`,
+                placeholder: "Switch Side Category",
+                options: listCategoryOptions("side")
             }
         ]
     });
@@ -282,6 +335,22 @@ function buildCategoryPayload({ bot, prefix, categoryKey, page, token, selectedB
     return {
         flags: COMPONENTS_V2_FLAG,
         components: [{ type: 17, components: children }]
+    };
+}
+
+function buildExpiredPayload() {
+    return {
+        flags: COMPONENTS_V2_FLAG,
+        components: [
+            {
+                type: 17,
+                components: [
+                    { type: 10, content: "## Help Panel Expired" },
+                    { type: 14, divider: true, spacing: 1 },
+                    { type: 10, content: "Run help command again." }
+                ]
+            }
+        ]
     };
 }
 
@@ -315,24 +384,12 @@ module.exports = {
     async handleInteraction({ bot, interaction }) {
         cleanupViews();
 
-        if (interaction.isStringSelectMenu() && interaction.customId.startsWith("help_category:")) {
+        if (interaction.isStringSelectMenu() && (interaction.customId.startsWith("help_category_main:") || interaction.customId.startsWith("help_category_side:"))) {
             const [, token] = interaction.customId.split(":");
             const view = helpViews.get(token);
             if (!view || view.expiresAt <= Date.now()) {
                 helpViews.delete(token);
-                await interaction.update({
-                    flags: COMPONENTS_V2_FLAG,
-                    components: [
-                        {
-                            type: 17,
-                            components: [
-                                { type: 10, content: "## Help Panel Expired" },
-                                { type: 14, divider: true, spacing: 1 },
-                                { type: 10, content: "Run help command again." }
-                            ]
-                        }
-                    ]
-                }).catch(() => null);
+                await interaction.update(buildExpiredPayload()).catch(() => null);
                 return true;
             }
 
@@ -363,19 +420,7 @@ module.exports = {
             const view = helpViews.get(token);
             if (!view || view.expiresAt <= Date.now()) {
                 helpViews.delete(token);
-                await interaction.update({
-                    flags: COMPONENTS_V2_FLAG,
-                    components: [
-                        {
-                            type: 17,
-                            components: [
-                                { type: 10, content: "## Help Panel Expired" },
-                                { type: 14, divider: true, spacing: 1 },
-                                { type: 10, content: "Run help command again." }
-                            ]
-                        }
-                    ]
-                }).catch(() => null);
+                await interaction.update(buildExpiredPayload()).catch(() => null);
                 return true;
             }
 
@@ -426,3 +471,4 @@ module.exports = {
         return false;
     }
 };
+

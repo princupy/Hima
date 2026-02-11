@@ -29,14 +29,19 @@ function toFallbackText(payload) {
 
 class HimaBot {
     constructor() {
-        this.config = loadConfig();
+        this.config = loadConfig();        const intents = [
+            GatewayIntentBits.Guilds,
+            GatewayIntentBits.GuildMessages,
+            GatewayIntentBits.GuildVoiceStates,
+            GatewayIntentBits.MessageContent
+        ];
+
+        if (String(process.env.ENABLE_GUILD_PRESENCES || "false").toLowerCase() === "true") {
+            intents.push(GatewayIntentBits.GuildPresences);
+        }
+
         this.client = new Client({
-            intents: [
-                GatewayIntentBits.Guilds,
-                GatewayIntentBits.GuildMessages,
-                GatewayIntentBits.GuildVoiceStates,
-                GatewayIntentBits.MessageContent
-            ],
+            intents,
             partials: [Partials.Channel]
         });
 
@@ -118,6 +123,7 @@ class HimaBot {
 }
 
 module.exports = { HimaBot };
+
 
 
 
