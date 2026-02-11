@@ -139,7 +139,7 @@ function buildAfkClearPayload() {
     });
 }
 
-function buildAfkDmPayload({ guildName, channelName, byUserId, reason, content }) {
+function buildAfkDmPayload({ guildName, channelName, byUserId, reason, content, messageUrl }) {
     const preview = String(content || "").trim().slice(0, 400) || "No message preview";
     return buildContainerMessage({
         title: "AFK Update",
@@ -149,7 +149,8 @@ function buildAfkDmPayload({ guildName, channelName, byUserId, reason, content }
             { name: "Server", value: guildName || "Unknown" },
             { name: "Channel", value: channelName ? `#${channelName}` : "Unknown" },
             { name: "Your AFK Reason", value: reason || "AFK" },
-            { name: "Message Preview", value: preview }
+            { name: "Message Preview", value: preview },
+            ...(messageUrl ? [{ name: "Jump To Message", value: `[Open Message](${messageUrl})` }] : [])
         ],
         footer: "Turn on DMs to always receive AFK alerts"
     });
@@ -203,7 +204,8 @@ async function notifyAfkUsers(bot, message, statuses) {
                 channelName: message.channel?.name,
                 byUserId: message.author.id,
                 reason: status.reason,
-                content: message.content
+                content: message.content,
+                messageUrl: message.url
             })).catch(() => null);
         } catch {
             // Ignore DM failures
@@ -248,3 +250,5 @@ module.exports = {
     enableAfk,
     disableAfk
 };
+
+
