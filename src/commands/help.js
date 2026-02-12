@@ -50,6 +50,13 @@ const PLAYLIST_HELP_ITEMS = [
     { name: "playlist autoload", usage: "playlist autoload <name|off>", aliases: ["playlist default"], description: "Auto-load default playlist on VC join." }
 ];
 
+const OWNER_HELP_ITEMS = [
+    { name: "noprefix add", usage: "noprefix add <@user|id>", aliases: [], description: "Owner-only: grant no-prefix with duration picker." },
+    { name: "noprefix remove", usage: "noprefix remove <@user|id>", aliases: [], description: "Owner-only: remove no-prefix access from user." },
+    { name: "noprefix list", usage: "noprefix list", aliases: [], description: "Owner-only: view active no-prefix users with pagination." },
+    { name: "noprefix status", usage: "noprefix status <@user|id>", aliases: [], description: "Owner-only: check no-prefix status for a user." },
+    { name: "svlist", usage: "svlist", aliases: ["serverlist", "guildlist"], description: "Owner-only: list all bot servers (5 per page)." }
+];
 const CATEGORY_GROUPS = {
     main: {
         key: "main",
@@ -126,6 +133,13 @@ const CATEGORIES = [
         group: "side",
         description: "General utility and bot info.",
         commands: ["help", "ping", "stats", "uptime", "botinfo", "serverstats", "voiceinfo", "shardinfo", "system", "support", "invite"]
+    },
+    {
+        key: "owner",
+        label: "Owner",
+        group: "side",
+        description: "Owner-only controls (no-prefix + server list).",
+        commands: ["noprefix", "svlist"]
     }
 ];
 
@@ -168,6 +182,7 @@ function getCategoryEntries(bot, category) {
     if (category.key === "playlists") return PLAYLIST_HELP_ITEMS;
     if (category.key === "filters") return FILTER_HELP_ITEMS;
     if (category.key === "favorites") return FAVORITE_HELP_ITEMS;
+    if (category.key === "owner") return OWNER_HELP_ITEMS;
     return getExistingCommands(bot, category.commands);
 }
 
@@ -471,4 +486,6 @@ module.exports = {
         return false;
     }
 };
+
+
 
