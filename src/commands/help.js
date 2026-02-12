@@ -118,7 +118,7 @@ const CATEGORIES = [
         label: "General",
         group: "side",
         description: "Profile and AFK convenience commands.",
-        commands: ["avatar", "afk", "membercount"]
+        commands: ["avatar", "banner", "afk", "membercount"]
     },
     {
         key: "settings",
