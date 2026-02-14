@@ -88,6 +88,7 @@
   font-family: "Space Grotesk", "Sora", sans-serif;
   font-size: 1.04rem;
   margin: 0;
+  overflow-wrap: anywhere;
 }
 
 .command-tier {
@@ -110,6 +111,7 @@
 .command-desc {
   margin: 0.45rem 0 0;
   color: var(--text-soft);
+  overflow-wrap: anywhere;
 }
 
 .command-tags {
@@ -119,8 +121,7 @@
   flex-wrap: wrap;
 }
 
-.command-tags span,
-.command-usage {
+.command-tags span {
   display: inline-flex;
   border: 1px solid var(--line);
   border-radius: 9px;
@@ -128,10 +129,21 @@
   padding: 0.3rem 0.5rem;
   font-size: 0.78rem;
   color: var(--text-soft);
+  overflow-wrap: anywhere;
 }
 
 .command-usage {
   margin-top: 0.55rem;
+  max-width: 100%;
+  white-space: normal;
+  display: block;
+  border: 1px solid var(--line);
+  border-radius: 9px;
+  background: var(--surface-2);
+  padding: 0.3rem 0.5rem;
+  font-size: 0.78rem;
+  color: var(--text-soft);
+  overflow-wrap: anywhere;
 }
 
 .command-paging {
@@ -182,4 +194,32 @@ html[data-theme="dark"] .command-tier.free {
 html[data-theme="dark"] .command-tier.premium {
   background: rgba(249, 115, 22, 0.2);
   color: #ffd0a8;
+}
+
+@media (max-width: 640px) {
+  .command-shell {
+    padding: 0.8rem;
+  }
+
+  .command-head {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .command-tier {
+    margin-top: 0.25rem;
+  }
+
+  .command-paging {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .command-paging .pager {
+    width: 100%;
+  }
+
+  .command-paging .pager button {
+    flex: 1;
+  }
 }

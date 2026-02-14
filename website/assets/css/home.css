@@ -267,3 +267,43 @@
 html[data-theme="dark"] .module-icon {
   background: linear-gradient(120deg, rgba(11, 136, 255, 0.25), rgba(16, 185, 129, 0.25));
 }
+
+@media (max-width: 640px) {
+  .hero {
+    gap: 0.8rem;
+  }
+
+  .hero-copy,
+  .hero-panel {
+    padding: 0.9rem;
+  }
+
+  .hero-actions {
+    display: grid;
+    grid-template-columns: 1fr;
+  }
+
+  .hero-actions .btn {
+    width: 100%;
+  }
+
+  .hero-badges {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.45rem;
+  }
+
+  .panel-live {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .flow-list li {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .flow-list li .chip {
+    margin-top: 0.25rem;
+  }
+}

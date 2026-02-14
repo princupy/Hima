@@ -96,3 +96,18 @@
     grid-template-columns: 1fr;
   }
 }
+
+
+@media (max-width: 640px) {
+  .plan {
+    padding: 0.9rem;
+  }
+
+  .plan .price {
+    font-size: 1.2rem;
+  }
+
+  .matrix {
+    padding: 0.75rem;
+  }
+}

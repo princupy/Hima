@@ -132,7 +132,7 @@ const CATEGORIES = [
         label: "Utility",
         group: "side",
         description: "General utility and bot info.",
-        commands: ["help", "ping", "stats", "uptime", "botinfo", "serverstats", "voiceinfo", "shardinfo", "system", "support", "invite"]
+        commands: ["help", "ping", "stats", "uptime", "botinfo", "serverstats", "voiceinfo", "shardinfo", "system", "support", "invite", "website"]
     },
     {
         key: "owner",
