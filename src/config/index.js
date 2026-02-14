@@ -1,4 +1,4 @@
-﻿const { parsePremiumNodesFromEnv } = require("../lavalink/nodes");
+const { parsePremiumNodesFromEnv } = require("../lavalink/nodes");
 
 function required(name) {
     const v = process.env[name];
@@ -19,7 +19,8 @@ function loadConfig() {
             port: Number(required("LAVALINK_PORT")),
             password: required("LAVALINK_PASSWORD"),
             secure: process.env.LAVALINK_SECURE === "true",
-            identifier: process.env.LAVALINK_IDENTIFIER || "public-node"
+            identifier: process.env.LAVALINK_IDENTIFIER || "public-node",
+            logChannelId: process.env.LAVALINK_LOG_CHANNEL_ID || ""
         },
         premiumLavalinkNodes: parsePremiumNodesFromEnv(process.env),
         spotify: {

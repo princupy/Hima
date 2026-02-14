@@ -20,17 +20,25 @@ const VOICE_JOIN_RETRIES = Number(process.env.VOICE_JOIN_RETRIES || 3);
 const IDLE_DISCONNECT_MS = 10_000;
 const VOICE_STATUS_ENABLED = String(process.env.VOICE_CHANNEL_STATUS_ENABLED || "true").toLowerCase() !== "false";
 const LAVALINK_RECONNECT_TRIES = Math.max(30, Number(process.env.LAVALINK_RECONNECT_TRIES || 999999));
-const LAVALINK_RECONNECT_INTERVAL = Math.max(1000, Number(process.env.LAVALINK_RECONNECT_INTERVAL_MS || 5000));
+const LAVALINK_RECONNECT_INTERVAL_SEC = Math.max(1, Math.floor(
+    Number(process.env.LAVALINK_RECONNECT_INTERVAL_SEC || 0)
+    || (Number(process.env.LAVALINK_RECONNECT_INTERVAL_MS || 5000) / 1000)
+));
+const NODE_WATCHDOG_INTERVAL_MS = Math.max(5000, Number(process.env.LAVALINK_NODE_WATCHDOG_INTERVAL_MS || 10000));
 
 class MusicManager {
-    constructor({ client, lavalink, premiumLavalinkNodes = [], sendContainer }) {
+    constructor({ client, lavalink, premiumLavalinkNodes = [], sendContainer, lavalinkLogChannelId = "" }) {
         this.client = client;
         this.sendContainer = sendContainer;
+        this.lavalinkLogChannelId = String(lavalinkLogChannelId || "").trim();
         this.states = new Map();
         this.nowPlayingCards = new Map();
         this.warnAt = new Map();
         this.playlistPicker = new Map();
         this.voiceStatusCache = new Map();
+        this.nodeStatus = new Map();
+        this.allNodesOffline = null;
+        this.nodeWatchdog = null;
 
         this.connector = new Connectors.DiscordJS(client);
         this.shoukaku = this.createShoukakuCluster("default", [
@@ -46,6 +54,8 @@ class MusicManager {
         this.premiumShoukaku = Array.isArray(premiumLavalinkNodes) && premiumLavalinkNodes.length
             ? this.createShoukakuCluster("premium", premiumLavalinkNodes)
             : null;
+
+        this.startNodeWatchdog();
     }
 
     createShoukakuCluster(label, nodes) {
@@ -58,7 +68,7 @@ class MusicManager {
 
         const cluster = new Shoukaku(this.connector, mapped, {
             reconnectTries: LAVALINK_RECONNECT_TRIES,
-            reconnectInterval: LAVALINK_RECONNECT_INTERVAL,
+            reconnectInterval: LAVALINK_RECONNECT_INTERVAL_SEC,
             moveOnDisconnect: false,
             resume: false,
             voiceConnectionTimeout: 30000
@@ -71,20 +81,174 @@ class MusicManager {
     registerNodeEvents(cluster, label) {
         cluster.on("ready", (name, resumed) => {
             console.log(`[Lavalink:${label}] Connected: ${name} (resumed=${resumed})`);
+            this.markNodeStatus({ label, name, online: true }).catch(() => null);
         });
 
         cluster.on("error", (name, error) => {
-            console.error(`[Lavalink:${label}] Node error (${name})`, error);
+            const reason = error?.message || String(error);
+            this.warnOnce(`node-error:${label}:${name}`, `[Lavalink:${label}] Node error (${name}): ${reason}`, 10000);
         });
 
         cluster.on("close", (name, code, reason) => {
             console.warn(`[Lavalink:${label}] Node disconnected (${name})`, { code, reason });
+            this.markNodeStatus({ label, name, online: false, code, reason }).catch(() => null);
         });
 
         cluster.on("reconnecting", (name, reconnectsLeft) => {
-            console.warn(`[Lavalink:${label}] Node reconnecting (${name}) - retries left: ${reconnectsLeft}`);
+            this.warnOnce(
+                `node-reconnecting:${label}:${name}`,
+                `[Lavalink:${label}] Node reconnecting (${name}) - retries left: ${reconnectsLeft}`,
+                15000
+            );
+        });
+
+        cluster.on("disconnect", (name, movedPlayers) => {
+            this.warnOnce(
+                `node-disconnect-final:${label}:${name}`,
+                `[Lavalink:${label}] Node gave up reconnecting (${name}). movedPlayers=${movedPlayers}`,
+                60000
+            );
         });
     }
+
+    getNodeStatusKey(label, name) {
+        return `${label}:${name}`;
+    }
+
+    async sendLavalinkNodeUpdate(payload) {
+        if (!this.lavalinkLogChannelId || !this.sendContainer) return;
+        await this.sendContainer(this.lavalinkLogChannelId, payload).catch(() => null);
+    }
+
+    async markNodeStatus({ label, name, online, code = null, reason = null }) {
+        const key = this.getNodeStatusKey(label, name);
+        const next = Boolean(online);
+        const previous = this.nodeStatus.get(key);
+        this.nodeStatus.set(key, next);
+
+        await this.notifyOverallNodeHealthIfChanged();
+
+        if (previous === next) return;
+        if (previous === undefined && next) return;
+
+        const poolName = label === "premium" ? "Premium" : "Default";
+        const summary = this.getNodeHealthSummary().overall;
+        const sections = [
+            { title: "Pool", content: poolName },
+            { title: "Node", content: String(name || "Unknown") },
+            { title: "Status", content: next ? "Online" : "Offline" },
+            { title: "Connected", content: `${summary.online}/${summary.total}` }
+        ];
+
+        if (!next) {
+            if (code != null) sections.push({ title: "Code", content: String(code) });
+            if (reason != null && String(reason).trim().length) {
+                sections.push({ title: "Reason", content: String(reason).slice(0, 600) });
+            }
+        }
+
+        await this.sendLavalinkNodeUpdate({
+            title: next ? "Lavalink Node Reconnected" : "Lavalink Node Disconnected",
+            description: next
+                ? "Node is back online. Playback can continue normally."
+                : "Node went offline. Auto reconnect is in progress.",
+            sections,
+            footer: next ? "Auto reconnect successful" : "Waiting for node to come back"
+        });
+    }
+
+    async notifyOverallNodeHealthIfChanged() {
+        const overall = this.getNodeHealthSummary().overall;
+        const isAllOffline = overall.total > 0 && overall.online === 0;
+
+        if (this.allNodesOffline === null) {
+            this.allNodesOffline = isAllOffline;
+            return;
+        }
+
+        if (this.allNodesOffline === isAllOffline) return;
+        this.allNodesOffline = isAllOffline;
+
+        if (isAllOffline) {
+            await this.sendLavalinkNodeUpdate({
+                title: "All Lavalink Nodes Offline",
+                description: "All playback nodes are offline right now.",
+                sections: [
+                    { title: "Advice", content: "Please try again after some time." },
+                    { title: "Connected", content: `${overall.online}/${overall.total}` }
+                ],
+                footer: "Bot is trying to reconnect automatically"
+            });
+            return;
+        }
+
+        await this.sendLavalinkNodeUpdate({
+            title: "Lavalink Restored",
+            description: "At least one node is back online and connected.",
+            sections: [{ title: "Connected", content: `${overall.online}/${overall.total}` }],
+            footer: "Auto reconnect completed"
+        });
+    }
+
+    startNodeWatchdog() {
+        if (this.nodeWatchdog) return;
+
+        this.nodeWatchdog = setInterval(() => {
+            this.ensureNodeConnections().catch((error) => {
+                this.warnOnce(
+                    "node-watchdog-error",
+                    `[Lavalink] Node watchdog error: ${error?.message || error}`,
+                    30000
+                );
+            });
+        }, NODE_WATCHDOG_INTERVAL_MS);
+
+        if (typeof this.nodeWatchdog.unref === "function") {
+            this.nodeWatchdog.unref();
+        }
+    }
+
+    async ensureNodeConnections() {
+        await this.ensureClusterConnections(this.shoukaku, "default");
+        await this.ensureClusterConnections(this.premiumShoukaku, "premium");
+        await this.notifyOverallNodeHealthIfChanged();
+    }
+
+    async ensureClusterConnections(cluster, label) {
+        if (!cluster) return;
+
+        const nodes = [...cluster.nodes.values()];
+        for (const node of nodes) {
+            const key = this.getNodeStatusKey(label, node.name);
+
+            if (this.isNodeUsable(node)) {
+                this.nodeStatus.set(key, true);
+                continue;
+            }
+
+            const state = Number(node?.state);
+            const isIdle = state === 3 || !Number.isFinite(state);
+            this.nodeStatus.set(key, false);
+
+            if (!isIdle) continue;
+
+            try {
+                node.connect();
+                this.warnOnce(
+                    `node-force-connect:${key}`,
+                    `[Lavalink:${label}] Force reconnect triggered for ${node.name}.`,
+                    15000
+                );
+            } catch (error) {
+                this.warnOnce(
+                    `node-force-connect-fail:${key}`,
+                    `[Lavalink:${label}] Force reconnect failed for ${node.name}: ${error?.message || error}`,
+                    30000
+                );
+            }
+        }
+    }
+
     init(botUserId) {
         this.botUserId = botUserId;
     }
@@ -175,7 +339,7 @@ class MusicManager {
         if (!node) return false;
         if (node.connected === true) return true;
         if (String(node.state || "").toUpperCase() === "CONNECTED") return true;
-        if (Number(node.state) === 2) return true;
+        if (Number(node.state) === 1) return true;
         if (node.ws && node.ws.readyState === 1) return true;
         return false;
     }
@@ -1523,6 +1687,11 @@ class MusicManager {
 }
 
 module.exports = { MusicManager };
+
+
+
+
+
 
 
 

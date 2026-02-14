@@ -27,6 +27,14 @@ function toFallbackText(payload) {
     return lines.join("\n").slice(0, 1900) || "Music update";
 }
 
+function isIgnorableLavalinkReconnectError(error) {
+    const status = Number(error?.status || 0);
+    if (status !== 404) return false;
+
+    const path = String(error?.path || "");
+    return /\/v4\/sessions\/[^/]+\/players\/\d+/.test(path);
+}
+
 class HimaBot {
     constructor() {
         this.config = loadConfig();        const intents = [
@@ -60,6 +68,7 @@ class HimaBot {
             client: this.client,
             lavalink: this.config.lavalink,
             premiumLavalinkNodes: this.config.premiumLavalinkNodes,
+            lavalinkLogChannelId: this.config.lavalink.logChannelId,
             sendContainer: async (channelId, payload) => {
                 const channel = await this.client.channels.fetch(channelId).catch(() => null);
                 if (!channel) return;
@@ -108,7 +117,17 @@ class HimaBot {
             console.error("[Discord Client Error]", error);
         });
 
+        let lastIgnoredLavalinkErrorAt = 0;
+
         process.on("unhandledRejection", (err) => {
+            if (isIgnorableLavalinkReconnectError(err)) {
+                const now = Date.now();
+                if (now - lastIgnoredLavalinkErrorAt > 15000) {
+                    lastIgnoredLavalinkErrorAt = now;
+                    console.warn("[Lavalink] Ignored stale player session update while node reconnecting.");
+                }
+                return;
+            }
             console.error("[Unhandled Rejection]", err);
         });
 
@@ -123,7 +142,3 @@ class HimaBot {
 }
 
 module.exports = { HimaBot };
-
-
-
-
