@@ -1,0 +1,98 @@
+.plan-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 1rem;
+}
+
+.plan {
+  padding: 1rem;
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  background: var(--surface);
+}
+
+.plan h3 {
+  margin: 0;
+}
+
+.plan .price {
+  margin-top: 0.45rem;
+  font-size: 1.35rem;
+  font-weight: 700;
+}
+
+.plan p {
+  margin: 0.5rem 0 0;
+  color: var(--text-soft);
+}
+
+.plan ul {
+  margin: 0.7rem 0 0;
+  padding-left: 1rem;
+  color: var(--text-soft);
+  display: grid;
+  gap: 0.3rem;
+}
+
+.plan.highlight {
+  border-color: rgba(11, 136, 255, 0.35);
+  box-shadow: 0 16px 35px rgba(11, 136, 255, 0.22);
+}
+
+.matrix {
+  padding: 1rem;
+  overflow-x: auto;
+}
+
+.matrix table {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 680px;
+}
+
+.matrix th,
+.matrix td {
+  border-bottom: 1px solid var(--line);
+  text-align: left;
+  padding: 0.75rem 0.55rem;
+  font-size: 0.9rem;
+}
+
+.matrix th {
+  color: var(--text-soft);
+  font-weight: 600;
+  background: var(--surface-2);
+}
+
+.flow-premium {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 0.7rem;
+}
+
+.flow-premium .step {
+  padding: 0.8rem;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: var(--surface);
+}
+
+.flow-premium .step b {
+  display: block;
+  color: var(--primary);
+  margin-bottom: 0.35rem;
+}
+
+@media (max-width: 980px) {
+  .plan-grid,
+  .flow-premium {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 760px) {
+  .plan-grid,
+  .flow-premium {
+    grid-template-columns: 1fr;
+  }
+}

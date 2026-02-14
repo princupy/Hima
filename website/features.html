@@ -1,0 +1,221 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Hima Bot | Features</title>
+  
+  <meta name="description" content="Hima bot feature architecture: music, filters, spotify, playlists, premium, owner controls." />
+    <script>
+    (function () {
+      try {
+        var t = localStorage.getItem("hima-theme");
+        if (t === "dark" || t === "light") {
+          document.documentElement.setAttribute("data-theme", t);
+          return;
+        }
+        if (window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches) {
+          document.documentElement.setAttribute("data-theme", "dark");
+        }
+      } catch (e) {
+        // Ignore pre-init errors.
+      }
+    })();
+  </script>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="assets/css/base.css" />
+  <link rel="stylesheet" href="assets/css/features.css" />
+</head>
+<body>
+  <div class="bg-orb orb-1"></div>
+  <div class="bg-orb orb-2"></div>
+  <div class="bg-orb orb-3"></div>
+
+  <header class="site-header">
+    <div class="container nav-wrap">
+      <a href="index.html" class="brand">
+        <span class="brand-badge">H</span>
+        <span>Hima Bot</span>
+      </a>
+      <nav class="nav-links" data-nav-links>
+        <a href="index.html" data-nav-link>Home</a>
+        <a href="features.html" data-nav-link>Features</a>
+        <a href="commands.html" data-nav-link>Commands</a>
+        <a href="premium.html" data-nav-link>Premium</a>
+        <a href="contact.html" data-nav-link>Deploy</a>
+      </nav>
+      <div class="nav-cta">
+        <a class="btn btn-secondary" href="commands.html">Command Explorer</a>
+        <button class="theme-toggle" type="button" data-theme-toggle aria-label="Toggle color theme"><span data-theme-label>Dark Mode</span></button>
+        <button class="mobile-toggle" data-nav-toggle aria-expanded="false" aria-label="Toggle navigation">Menu</button>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <div class="container">
+      <section class="section reveal">
+        <p class="eyebrow">Feature Matrix</p>
+        <h1 class="h-title">Built as a production-ready Discord music ecosystem</h1>
+        <p class="h-desc">Hima is not just a play command bot. It contains data-layer features, premium gates, interactive components, recovery logic, and configurable behavior per guild/user.</p>
+      </section>
+
+      <section class="section">
+        <div class="feature-grid">
+          <article class="feature-item reveal">
+            <span class="chip">Music Core</span>
+            <h3>Lavalink Playback Layer</h3>
+            <p>Queue engine, play/pause/resume/skip/stop/disconnect, autoplay, loop modes and real-time nowplaying updates.</p>
+            <ul>
+              <li>Fast search routing</li>
+              <li>Queue pagination + controls</li>
+              <li>Track-stuck fallback handling</li>
+            </ul>
+          </article>
+
+          <article class="feature-item reveal">
+            <span class="chip">Components V2</span>
+            <h3>Container-first UI</h3>
+            <p>All bot responses are aligned to component-driven layouts with modern in-message controls.</p>
+            <ul>
+              <li>Button interactions</li>
+              <li>Dropdown category switchers</li>
+              <li>Pagination and panel ownership locks</li>
+            </ul>
+          </article>
+
+          <article class="feature-item reveal">
+            <span class="chip">Audio FX</span>
+            <h3>Realtime Filter Presets</h3>
+            <p>Rich filter presets for users who need custom listening vibe without leaving the server.</p>
+            <ul>
+              <li>Bassboost, nightcore, 8D</li>
+              <li>Karaoke, tremolo, radio</li>
+              <li>Instant filter reset</li>
+            </ul>
+          </article>
+
+          <article class="feature-item reveal">
+            <span class="chip">Spotify</span>
+            <h3>Profile and Playlist Integration</h3>
+            <p>Users can connect Spotify profile, list cloud playlists and launch playback through bot commands.</p>
+            <ul>
+              <li>spconnect / spstatus</li>
+              <li>spplaylists browsing</li>
+              <li>spplay direct queue load</li>
+            </ul>
+          </article>
+
+          <article class="feature-item reveal">
+            <span class="chip">Premium Data</span>
+            <h3>Vote + Buy Access Model</h3>
+            <p>Dual premium system with timed vote access and paid token redemption for long-term guild unlocks.</p>
+            <ul>
+              <li>12h vote premium checks</li>
+              <li>Guild token redeem plans</li>
+              <li>24/7 and musicard gates</li>
+            </ul>
+          </article>
+
+          <article class="feature-item reveal">
+            <span class="chip">Cloud Storage</span>
+            <h3>Playlists + Favorites</h3>
+            <p>Save tracks permanently, create shared playlists, import/export JSON, autosync and autoload flow.</p>
+            <ul>
+              <li>Playlist ID share/import</li>
+              <li>Favorites from player controls</li>
+              <li>Queue-to-collection actions</li>
+            </ul>
+          </article>
+
+          <article class="feature-item reveal">
+            <span class="chip">Guild Controls</span>
+            <h3>Settings and Moderation</h3>
+            <p>Per-guild prefix, music channel lock, config insights and owner-only governance commands.</p>
+            <ul>
+              <li>Custom prefix storage</li>
+              <li>Music command lock channel</li>
+              <li>Server list + no-prefix controls</li>
+            </ul>
+          </article>
+
+          <article class="feature-item reveal">
+            <span class="chip">General</span>
+            <h3>AFK + Profile Tools</h3>
+            <p>Advanced AFK with status, mention notifications, and profile media utilities.</p>
+            <ul>
+              <li>Global/server AFK mode</li>
+              <li>Avatar and banner viewer</li>
+              <li>Member presence counters</li>
+            </ul>
+          </article>
+
+          <article class="feature-item reveal">
+            <span class="chip">Reliability</span>
+            <h3>Recovery and Runtime Safety</h3>
+            <p>Error handling and fallback logic designed for long-running music sessions across multiple guilds.</p>
+            <ul>
+              <li>Graceful command error UI</li>
+              <li>Node reconnect awareness</li>
+              <li>State cleanup and panel expiry</li>
+            </ul>
+          </article>
+        </div>
+      </section>
+
+      <section class="section grid grid-2">
+        <article class="card reveal" style="padding:1rem;">
+          <p class="eyebrow">Core Stack</p>
+          <h2 class="h-title">Tech foundation</h2>
+          <div class="stack" style="margin-top: 1rem;">
+            <div class="tile"><span>Node.js Runtime</span><b>20+</b></div>
+            <div class="tile"><span>Discord API Layer</span><b>discord.js v14+</b></div>
+            <div class="tile"><span>Music Engine</span><b>Shoukaku + Lavalink</b></div>
+            <div class="tile"><span>Database</span><b>Supabase</b></div>
+            <div class="tile"><span>Spotify</span><b>Web API Integration</b></div>
+            <div class="tile"><span>UI Protocol</span><b>Components V2</b></div>
+          </div>
+        </article>
+
+        <article class="card timeline reveal">
+          <p class="eyebrow">Execution Flow</p>
+          <h2 class="h-title">From command to music output</h2>
+          <ol class="timeline-list" style="margin-top: 1rem;">
+            <li>
+              <h4>Message Handler</h4>
+              <p>Prefix/no-prefix parsing, permission and premium checks.</p>
+            </li>
+            <li>
+              <h4>Resolver Layer</h4>
+              <p>Lavalink/Spotify search resolution and queue insert strategy.</p>
+            </li>
+            <li>
+              <h4>Player Pipeline</h4>
+              <p>Voice connection control, playback update and autoplay logic.</p>
+            </li>
+            <li>
+              <h4>Container Renderer</h4>
+              <p>Live controls, musicard visuals and interactive command panels.</p>
+            </li>
+          </ol>
+        </article>
+      </section>
+    </div>
+  </main>
+
+  <footer>
+    <div class="container footer-row">
+      <span>Hima Bot Web | <span data-year></span></span>
+      <div class="footer-links">
+        <a href="commands.html">Commands</a>
+        <a href="premium.html">Premium</a>
+        <a href="contact.html">Deploy</a>
+      </div>
+    </div>
+  </footer>
+
+  <script src="assets/js/main.js"></script>
+</body>
+</html>

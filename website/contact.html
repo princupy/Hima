@@ -1,0 +1,133 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Hima Bot | Deploy & Support</title>
+  
+  <meta name="description" content="Deploy Hima website and bot docs links, setup pointers, and support contacts." />
+    <script>
+    (function () {
+      try {
+        var t = localStorage.getItem("hima-theme");
+        if (t === "dark" || t === "light") {
+          document.documentElement.setAttribute("data-theme", t);
+          return;
+        }
+        if (window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches) {
+          document.documentElement.setAttribute("data-theme", "dark");
+        }
+      } catch (e) {
+        // Ignore pre-init errors.
+      }
+    })();
+  </script>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="assets/css/base.css" />
+  <link rel="stylesheet" href="assets/css/contact.css" />
+</head>
+<body>
+  <div class="bg-orb orb-1"></div>
+  <div class="bg-orb orb-2"></div>
+  <div class="bg-orb orb-3"></div>
+
+  <header class="site-header">
+    <div class="container nav-wrap">
+      <a href="index.html" class="brand">
+        <span class="brand-badge">H</span>
+        <span>Hima Bot</span>
+      </a>
+      <nav class="nav-links" data-nav-links>
+        <a href="index.html" data-nav-link>Home</a>
+        <a href="features.html" data-nav-link>Features</a>
+        <a href="commands.html" data-nav-link>Commands</a>
+        <a href="premium.html" data-nav-link>Premium</a>
+        <a href="contact.html" data-nav-link>Deploy</a>
+      </nav>
+      <div class="nav-cta">
+        <a class="btn btn-secondary" href="index.html">Back Home</a>
+        <button class="theme-toggle" type="button" data-theme-toggle aria-label="Toggle color theme"><span data-theme-label>Dark Mode</span></button>
+        <button class="mobile-toggle" data-nav-toggle aria-expanded="false" aria-label="Toggle navigation">Menu</button>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <div class="container">
+      <section class="section reveal">
+        <p class="eyebrow">Deployment Zone</p>
+        <h1 class="h-title">Launch website + bot docs cleanly</h1>
+        <p class="h-desc">This static website sits in <code>Hima/website</code>. You can deploy it on GitHub Pages, Cloudflare Pages, Netlify, or your VPS Nginx setup.</p>
+      </section>
+
+      <section class="section contact-grid">
+        <article class="contact-card reveal">
+          <h3>Website Deploy (Static)</h3>
+          <p>Quick static hosting options for this multi-page interface.</p>
+          <ul class="contact-list">
+            <li>GitHub Pages: deploy <code>/website</code> as root publish folder.</li>
+            <li>Cloudflare Pages: connect repo and set output dir to <code>website</code>.</li>
+            <li>Netlify: drag-drop <code>website</code> folder or link repo.</li>
+            <li>VPS Nginx: copy files to <code>/var/www/hima</code>.</li>
+          </ul>
+          <div class="notice" style="margin-top: .8rem;">If links break after deployment, keep all files structure exactly as created in this folder.</div>
+        </article>
+
+        <article class="contact-card reveal">
+          <h3>Bot Runtime Setup</h3>
+          <p>For full bot + website stack usage, keep these backend services online:</p>
+          <ul class="contact-list">
+            <li>Discord bot process (Node.js 20+)</li>
+            <li>Lavalink node(s)</li>
+            <li>Supabase database</li>
+            <li>Spotify API keys</li>
+          </ul>
+          <div class="link-grid">
+            <a href="https://github.com/princupy/Hima#readme" target="_blank" rel="noreferrer">Open root bot README</a>
+            <a href="commands.html">Open command explorer</a>
+            <a href="premium.html">Open premium model page</a>
+          </div>
+        </article>
+      </section>
+
+      <section class="section contact-grid">
+        <article class="contact-card reveal">
+          <h3>Production Checklist</h3>
+          <ul class="contact-list">
+            <li>Set env vars securely (never commit real secrets).</li>
+            <li>Enable restart manager (PM2/systemd).</li>
+            <li>Monitor Lavalink connectivity health.</li>
+            <li>Rotate tokens/keys periodically.</li>
+            <li>Keep vote reminder and premium expiry jobs active.</li>
+          </ul>
+        </article>
+
+        <article class="contact-card reveal">
+          <h3>Support Links</h3>
+          <p>You can replace these placeholders with your live brand/community URLs.</p>
+          <div class="link-grid">
+            <a href="https://discord.gg/37WBxRXVq5" target="_blank" rel="noreferrer">Discord Support Server</a>
+            <a href="https://www.instagram.com/tanmoy_here8388/" target="_blank" rel="noreferrer">Instagram</a>
+            <a href="https://top.gg/" target="_blank" rel="noreferrer">Top.gg Vote Portal</a>
+          </div>
+        </article>
+      </section>
+    </div>
+  </main>
+
+  <footer>
+    <div class="container footer-row">
+      <span>Hima Bot Web | <span data-year></span></span>
+      <div class="footer-links">
+        <a href="features.html">Features</a>
+        <a href="commands.html">Commands</a>
+        <a href="premium.html">Premium</a>
+      </div>
+    </div>
+  </footer>
+
+  <script src="assets/js/main.js"></script>
+</body>
+</html>

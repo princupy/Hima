@@ -1,0 +1,111 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Hima Bot | Command Explorer</title>
+  
+  <meta name="description" content="Search all Hima bot commands by category, usage and premium availability." />
+    <script>
+    (function () {
+      try {
+        var t = localStorage.getItem("hima-theme");
+        if (t === "dark" || t === "light") {
+          document.documentElement.setAttribute("data-theme", t);
+          return;
+        }
+        if (window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches) {
+          document.documentElement.setAttribute("data-theme", "dark");
+        }
+      } catch (e) {
+        // Ignore pre-init errors.
+      }
+    })();
+  </script>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="assets/css/base.css" />
+  <link rel="stylesheet" href="assets/css/commands.css" />
+</head>
+<body>
+  <div class="bg-orb orb-1"></div>
+  <div class="bg-orb orb-2"></div>
+  <div class="bg-orb orb-3"></div>
+
+  <header class="site-header">
+    <div class="container nav-wrap">
+      <a href="index.html" class="brand">
+        <span class="brand-badge">H</span>
+        <span>Hima Bot</span>
+      </a>
+      <nav class="nav-links" data-nav-links>
+        <a href="index.html" data-nav-link>Home</a>
+        <a href="features.html" data-nav-link>Features</a>
+        <a href="commands.html" data-nav-link>Commands</a>
+        <a href="premium.html" data-nav-link>Premium</a>
+        <a href="contact.html" data-nav-link>Deploy</a>
+      </nav>
+      <div class="nav-cta">
+        <a class="btn btn-secondary" href="premium.html">Premium Plans</a>
+        <button class="theme-toggle" type="button" data-theme-toggle aria-label="Toggle color theme"><span data-theme-label>Dark Mode</span></button>
+        <button class="mobile-toggle" data-nav-toggle aria-expanded="false" aria-label="Toggle navigation">Menu</button>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <div class="container">
+      <section class="section reveal">
+        <p class="eyebrow">Command Center</p>
+        <h1 class="h-title">Live searchable Hima command explorer</h1>
+        <p class="h-desc">Search by keyword, filter by category, or show only premium commands. This page is fully data-driven from a structured command catalog JSON.</p>
+      </section>
+
+      <section class="section">
+        <article class="card command-shell" data-command-app>
+          <div class="command-controls reveal is-visible">
+            <input type="search" placeholder="Search command, usage, alias or feature..." data-search />
+            <select data-category>
+              <option value="all">All categories</option>
+            </select>
+            <button class="premium-toggle" type="button" data-premium-toggle>Premium Only</button>
+          </div>
+
+          <div class="category-chips" data-category-chips></div>
+
+          <div class="command-meta">
+            <span class="chip" data-count>0 command(s) matched</span>
+            <span class="chip">Prefix default: <strong>H!</strong></span>
+            <span class="chip">UI mode: Components V2</span>
+          </div>
+
+          <div class="command-list" data-command-list></div>
+
+          <div class="command-paging">
+            <span class="chip" data-page>Page 1 / 1</span>
+            <div class="pager">
+              <button type="button" data-prev>Previous</button>
+              <button type="button" data-next>Next</button>
+            </div>
+          </div>
+        </article>
+      </section>
+    </div>
+  </main>
+
+  <footer>
+    <div class="container footer-row">
+      <span>Hima Bot Web | <span data-year></span></span>
+      <div class="footer-links">
+        <a href="features.html">Features</a>
+        <a href="premium.html">Premium</a>
+        <a href="contact.html">Deploy</a>
+      </div>
+    </div>
+  </footer>
+
+  <script src="assets/js/main.js"></script>
+  <script src="assets/js/commands.js"></script>
+</body>
+</html>

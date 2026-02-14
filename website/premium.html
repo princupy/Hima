@@ -1,0 +1,204 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Hima Bot | Premium Systems</title>
+  
+  <meta name="description" content="Hima premium architecture: vote premium, buy premium, token generation and guild unlocks." />
+    <script>
+    (function () {
+      try {
+        var t = localStorage.getItem("hima-theme");
+        if (t === "dark" || t === "light") {
+          document.documentElement.setAttribute("data-theme", t);
+          return;
+        }
+        if (window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches) {
+          document.documentElement.setAttribute("data-theme", "dark");
+        }
+      } catch (e) {
+        // Ignore pre-init errors.
+      }
+    })();
+  </script>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="assets/css/base.css" />
+  <link rel="stylesheet" href="assets/css/premium.css" />
+</head>
+<body>
+  <div class="bg-orb orb-1"></div>
+  <div class="bg-orb orb-2"></div>
+  <div class="bg-orb orb-3"></div>
+
+  <header class="site-header">
+    <div class="container nav-wrap">
+      <a href="index.html" class="brand">
+        <span class="brand-badge">H</span>
+        <span>Hima Bot</span>
+      </a>
+      <nav class="nav-links" data-nav-links>
+        <a href="index.html" data-nav-link>Home</a>
+        <a href="features.html" data-nav-link>Features</a>
+        <a href="commands.html" data-nav-link>Commands</a>
+        <a href="premium.html" data-nav-link>Premium</a>
+        <a href="contact.html" data-nav-link>Deploy</a>
+      </nav>
+      <div class="nav-cta">
+        <a class="btn btn-primary" href="commands.html">View Premium Commands</a>
+        <button class="theme-toggle" type="button" data-theme-toggle aria-label="Toggle color theme"><span data-theme-label>Dark Mode</span></button>
+        <button class="mobile-toggle" data-nav-toggle aria-expanded="false" aria-label="Toggle navigation">Menu</button>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <div class="container">
+      <section class="section reveal">
+        <p class="eyebrow">Premium Architecture</p>
+        <h1 class="h-title">Dual premium model: Vote unlock + Buy token unlock</h1>
+        <p class="h-desc">Hima supports both quick vote-based access and paid guild plans. Vote premium gives short access windows, while token redeem unlocks stable long-term guild premium features.</p>
+      </section>
+
+      <section class="section">
+        <div class="plan-grid">
+          <article class="plan reveal">
+            <span class="chip">User Vote Premium</span>
+            <h3>Top.gg Vote Access</h3>
+            <div class="price">INR 0</div>
+            <p>Vote and get temporary premium access for fast personal usage unlock.</p>
+            <ul>
+              <li>Valid for 12 hours</li>
+              <li>Enables personal prefix usage</li>
+              <li>Can enable admin-level premium actions when active</li>
+            </ul>
+          </article>
+
+          <article class="plan highlight reveal">
+            <span class="chip">Guild Buy Premium</span>
+            <h3>Token Redeem Plans</h3>
+            <div class="price">Starts INR 149</div>
+            <p>Owner generates duration token, guild admin redeems to activate premium on server.</p>
+            <ul>
+              <li>1 week to permanent plans</li>
+              <li>Guild musicard themes</li>
+              <li>24/7 and premium-only commands</li>
+            </ul>
+          </article>
+
+          <article class="plan reveal">
+            <span class="chip">Hybrid Access</span>
+            <h3>Best of Both</h3>
+            <div class="price">Flexible</div>
+            <p>Users can keep quick vote unlocks while servers run full premium via redeemed tokens.</p>
+            <ul>
+              <li>User-level + guild-level checks</li>
+              <li>Automatic expiry handling</li>
+              <li>Status command visibility</li>
+            </ul>
+          </article>
+        </div>
+      </section>
+
+      <section class="section">
+        <article class="card matrix reveal">
+          <div class="section-head" style="margin-bottom: .6rem;">
+            <div>
+              <p class="eyebrow">Plan Table</p>
+              <h2 class="h-title">Suggested buy premium pricing (INR)</h2>
+            </div>
+          </div>
+          <table>
+            <thead>
+              <tr>
+                <th>Duration</th>
+                <th>Suggested Price</th>
+                <th>Access Scope</th>
+                <th>Typical Use</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>1 Week</td>
+                <td>INR 149</td>
+                <td>Guild Premium</td>
+                <td>Trial premium server</td>
+              </tr>
+              <tr>
+                <td>1 Month</td>
+                <td>INR 399</td>
+                <td>Guild Premium</td>
+                <td>Small active communities</td>
+              </tr>
+              <tr>
+                <td>6 Months</td>
+                <td>INR 1999</td>
+                <td>Guild Premium</td>
+                <td>Growing music communities</td>
+              </tr>
+              <tr>
+                <td>1 Year</td>
+                <td>INR 3499</td>
+                <td>Guild Premium</td>
+                <td>Long-term discounted plan</td>
+              </tr>
+              <tr>
+                <td>Permanent</td>
+                <td>INR 6999</td>
+                <td>Guild Premium</td>
+                <td>One-time lifetime unlock</td>
+              </tr>
+            </tbody>
+          </table>
+        </article>
+      </section>
+
+      <section class="section">
+        <div class="section-head reveal">
+          <div>
+            <p class="eyebrow">Redeem Flow</p>
+            <h2 class="h-title">Token workflow in 4 steps</h2>
+            <p class="h-desc">Keep sales and provisioning controlled: token generated by owner, redeemed by guild admin only.</p>
+          </div>
+        </div>
+
+        <div class="flow-premium">
+          <article class="step reveal"><b>Step 1</b>Owner runs <code>premiumtoken</code> and chooses plan duration.</article>
+          <article class="step reveal"><b>Step 2</b>Bot generates secure token mapped to duration + price metadata.</article>
+          <article class="step reveal"><b>Step 3</b>Guild admin runs <code>premiumredeem &lt;token&gt;</code> in target server.</article>
+          <article class="step reveal"><b>Step 4</b>Guild premium, theme controls and 24/7 access go live instantly.</article>
+        </div>
+      </section>
+
+      <section class="section reveal">
+        <article class="card" style="padding: 1rem;">
+          <p class="eyebrow">Premium Feature Unlocks</p>
+          <h2 class="h-title">What gets unlocked</h2>
+          <div class="grid grid-3" style="margin-top: 1rem;">
+            <div class="chip">Custom user prefix (`myprefix`)</div>
+            <div class="chip">Musicard theme switch (`mycard`)</div>
+            <div class="chip">24/7 VC stay mode (`247`)</div>
+            <div class="chip">Spotify account playlist flow</div>
+            <div class="chip">Cloud playlists + autosync + autoload</div>
+            <div class="chip">Favorites engine + player quick add</div>
+          </div>
+        </article>
+      </section>
+    </div>
+  </main>
+
+  <footer>
+    <div class="container footer-row">
+      <span>Hima Bot Web | <span data-year></span></span>
+      <div class="footer-links">
+        <a href="commands.html">Commands</a>
+        <a href="contact.html">Deploy</a>
+      </div>
+    </div>
+  </footer>
+
+  <script src="assets/js/main.js"></script>
+</body>
+</html>

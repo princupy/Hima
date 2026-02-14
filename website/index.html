@@ -1,0 +1,241 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Hima Bot | Advanced Discord Music Experience</title>
+  
+  <meta name="description" content="Official Hima bot website - advanced Discord music bot with Lavalink, Spotify, playlists, premium systems, and modern controls." />
+    <script>
+    (function () {
+      try {
+        var t = localStorage.getItem("hima-theme");
+        if (t === "dark" || t === "light") {
+          document.documentElement.setAttribute("data-theme", t);
+          return;
+        }
+        if (window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches) {
+          document.documentElement.setAttribute("data-theme", "dark");
+        }
+      } catch (e) {
+        // Ignore pre-init errors.
+      }
+    })();
+  </script>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="assets/css/base.css" />
+  <link rel="stylesheet" href="assets/css/home.css" />
+</head>
+<body>
+  <div class="bg-orb orb-1"></div>
+  <div class="bg-orb orb-2"></div>
+  <div class="bg-orb orb-3"></div>
+
+  <header class="site-header">
+    <div class="container nav-wrap">
+      <a href="index.html" class="brand">
+        <span class="brand-badge">H</span>
+        <span>Hima Bot</span>
+      </a>
+
+      <nav class="nav-links" data-nav-links>
+        <a href="index.html" data-nav-link>Home</a>
+        <a href="features.html" data-nav-link>Features</a>
+        <a href="commands.html" data-nav-link>Commands</a>
+        <a href="premium.html" data-nav-link>Premium</a>
+        <a href="contact.html" data-nav-link>Deploy</a>
+      </nav>
+
+      <div class="nav-cta">
+        <a class="btn btn-secondary" href="commands.html">Explore Commands</a>
+        <button class="theme-toggle" type="button" data-theme-toggle aria-label="Toggle color theme"><span data-theme-label>Dark Mode</span></button>
+        <button class="mobile-toggle" data-nav-toggle aria-expanded="false" aria-label="Toggle navigation">Menu</button>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <div class="container">
+      <section class="hero section">
+        <article class="card hero-copy reveal">
+          <p class="eyebrow">Discord Music Engine</p>
+          <h1 class="hero-title">Turn every guild into a <span class="gradient-text" data-rotate="live DJ room|smart music hub|premium listening lounge">live DJ room</span>.</h1>
+          <p class="hero-sub">
+            Hima is a full-stack Discord music bot built with Lavalink, advanced queue controls, Spotify flow,
+            cloud playlists, favorites, premium access logic, and a modern Components V2 interface.
+          </p>
+
+          <div class="hero-actions">
+            <a class="btn btn-primary" href="commands.html">View All Commands</a>
+            <a class="btn btn-secondary" href="premium.html">Premium Systems</a>
+            <a class="btn btn-ghost" href="features.html">Architecture</a>
+          </div>
+
+          <div class="hero-badges">
+            <span class="badge">Node.js 20+</span>
+            <span class="badge">discord.js v14+</span>
+            <span class="badge">Lavalink + Spotify</span>
+            <span class="badge">Supabase-backed</span>
+          </div>
+        </article>
+
+        <aside class="card hero-panel reveal">
+          <div class="panel-live">
+            <div>
+              <strong>Realtime Bot Status</strong>
+              <div style="color: var(--text-soft); font-size: .86rem; margin-top: .2rem;">Optimized for multi-feature production servers</div>
+            </div>
+            <div class="pulse" aria-hidden="true"></div>
+          </div>
+
+          <div class="panel-grid">
+            <div class="metric">
+              <div class="num" data-counter="45">45</div>
+              <div class="cap">Core Commands</div>
+            </div>
+            <div class="metric">
+              <div class="num" data-counter="10">10</div>
+              <div class="cap">Command Categories</div>
+            </div>
+            <div class="metric">
+              <div class="num" data-counter="6">6</div>
+              <div class="cap">Musicard Themes</div>
+            </div>
+            <div class="metric">
+              <div class="num" data-counter="16">16</div>
+              <div class="cap">Audio Filter Presets</div>
+            </div>
+          </div>
+
+          <div class="control-stack">
+            <strong>In-player Controls</strong>
+            <div class="control-row">
+              <span>Pause</span><span>Resume</span><span>Skip</span><span>Loop</span><span>Stop</span>
+            </div>
+            <div class="control-row">
+              <span>Add to Playlist</span><span>Favorite</span><span>Queue Nav</span>
+            </div>
+          </div>
+        </aside>
+      </section>
+
+      <section class="section reveal">
+        <div class="card stat-band">
+          <div class="stat-item">
+            <h3 data-counter="24">24</h3>
+            <p>Core uptime optimization and reconnect logic</p>
+          </div>
+          <div class="stat-item">
+            <h3 data-counter="12">12</h3>
+            <p>Hour vote premium cycle support with renewal flow</p>
+          </div>
+          <div class="stat-item">
+            <h3 data-counter="2">2</h3>
+            <p>Main command groups: Main + Extra architecture</p>
+          </div>
+          <div class="stat-item">
+            <h3 data-counter="100">100</h3>
+            <p>Percent Components V2 based container experience</p>
+          </div>
+        </div>
+      </section>
+
+      <section class="section">
+        <div class="section-head reveal">
+          <div>
+            <p class="eyebrow">Feature Modules</p>
+            <h2 class="h-title">Everything already running in your Hima bot</h2>
+            <p class="h-desc">Website mirrors live bot systems: music pipeline, premium gate, playlist cloud, Spotify profiles, favorites, no-prefix and owner panels.</p>
+          </div>
+        </div>
+
+        <div class="grid grid-3">
+          <article class="module-card reveal">
+            <div class="module-icon">??</div>
+            <h3>Music Core</h3>
+            <p>Fast search, queue pages, nowplaying status, lyrics, autoplay, voice safeguards, and rich controls.</p>
+          </article>
+          <article class="module-card reveal">
+            <div class="module-icon">???</div>
+            <h3>Realtime Filters</h3>
+            <p>Bassboost, vaporwave, nightcore, karaoke, 8D, tremolo, radio and more presets in one flow.</p>
+          </article>
+          <article class="module-card reveal">
+            <div class="module-icon">??</div>
+            <h3>Spotify Layer</h3>
+            <p>Profile connect, playlist listing, direct play and premium-gated Spotify control commands.</p>
+          </article>
+          <article class="module-card reveal">
+            <div class="module-icon">??</div>
+            <h3>Cloud Playlists</h3>
+            <p>User/shared playlists, autosync, autoload, import/export and playlist ID sharing workflow.</p>
+          </article>
+          <article class="module-card reveal">
+            <div class="module-icon">?</div>
+            <h3>Favorites Engine</h3>
+            <p>Save from player, queue to favorites, play by index, or play all favorite tracks in order.</p>
+          </article>
+          <article class="module-card reveal">
+            <div class="module-icon">???</div>
+            <h3>Premium + Owner</h3>
+            <p>Vote premium, paid token redeem, 24/7 mode, myprefix, no-prefix controls and owner svlist panel.</p>
+          </article>
+        </div>
+      </section>
+
+      <section class="section">
+        <div class="grid grid-2">
+          <article class="card flow reveal">
+            <div class="section-head" style="margin-bottom: 1rem;">
+              <div>
+                <p class="eyebrow">Bot Pipeline</p>
+                <h2 class="h-title">How playback flows inside Hima</h2>
+              </div>
+            </div>
+            <ol class="flow-list">
+              <li><span><b>01</b> Prefix command hits message handler</span><span class="chip">H!play query</span></li>
+              <li><span><b>02</b> Premium + channel + permission checks</span><span class="chip">Access Gate</span></li>
+              <li><span><b>03</b> Lavalink resolve + queue update</span><span class="chip">Search</span></li>
+              <li><span><b>04</b> Components V2 player container render</span><span class="chip">UI Sync</span></li>
+              <li><span><b>05</b> Auto transitions (loop/autoplay/247)</span><span class="chip">Continuous</span></li>
+            </ol>
+          </article>
+
+          <article class="card flow reveal">
+            <div class="section-head" style="margin-bottom: 1rem;">
+              <div>
+                <p class="eyebrow">Quick Navigation</p>
+                <h2 class="h-title">Explore every module page</h2>
+              </div>
+            </div>
+            <div class="quick-links">
+              <a href="features.html">System Features</a>
+              <a href="commands.html">Searchable Commands</a>
+              <a href="premium.html">Premium Matrix</a>
+              <a href="contact.html">Deploy Guide</a>
+              <a href="commands.html#owner">Owner Tools</a>
+            </div>
+            <p class="h-desc" style="margin-top: 1rem;">This website lives in <code>Hima/website</code> so you can deploy it separately or host via GitHub Pages/Cloudflare Pages.</p>
+          </article>
+        </div>
+      </section>
+    </div>
+  </main>
+
+  <footer>
+    <div class="container footer-row">
+      <span>Hima Bot Web | <span data-year></span></span>
+      <div class="footer-links">
+        <a href="index.html">Home</a>
+        <a href="features.html">Features</a>
+        <a href="commands.html">Commands</a>
+        <a href="premium.html">Premium</a>
+      </div>
+    </div>
+  </footer>
+
+  <script src="assets/js/main.js"></script>
+</body>
+</html>

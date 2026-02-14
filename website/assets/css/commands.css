@@ -1,0 +1,185 @@
+.command-shell {
+  padding: 1rem;
+}
+
+.command-controls {
+  display: grid;
+  grid-template-columns: 1.2fr 1fr auto;
+  gap: 0.7rem;
+}
+
+.command-controls input,
+.command-controls select {
+  width: 100%;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: var(--surface);
+  padding: 0.72rem 0.85rem;
+  font: inherit;
+  color: var(--text);
+}
+
+.command-controls .premium-toggle {
+  padding: 0.72rem 0.9rem;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: var(--surface);
+  color: var(--text-soft);
+  font-weight: 600;
+}
+
+.command-controls .premium-toggle.active {
+  border-color: rgba(11, 136, 255, 0.35);
+  background: #eaf3ff;
+  color: #0f64c2;
+}
+
+.category-chips {
+  margin-top: 0.85rem;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+}
+
+.category-chips button {
+  border: 1px solid var(--line);
+  background: var(--surface);
+  color: var(--text-soft);
+  border-radius: 999px;
+  padding: 0.42rem 0.72rem;
+  font-size: 0.82rem;
+  cursor: pointer;
+}
+
+.category-chips button.active {
+  color: #fff;
+  border-color: transparent;
+  background: linear-gradient(120deg, #0b88ff, #10b981);
+}
+
+.command-meta {
+  margin-top: 0.9rem;
+  display: flex;
+  gap: 0.7rem;
+  flex-wrap: wrap;
+}
+
+.command-list {
+  margin-top: 1rem;
+  display: grid;
+  gap: 0.75rem;
+}
+
+.command-card {
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background: var(--surface);
+  padding: 0.9rem;
+}
+
+.command-head {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.8rem;
+  align-items: center;
+}
+
+.command-name {
+  font-family: "Space Grotesk", "Sora", sans-serif;
+  font-size: 1.04rem;
+  margin: 0;
+}
+
+.command-tier {
+  border-radius: 999px;
+  font-size: 0.72rem;
+  padding: 0.2rem 0.6rem;
+  font-weight: 700;
+}
+
+.command-tier.free {
+  background: #ecfdf5;
+  color: #0f8f63;
+}
+
+.command-tier.premium {
+  background: #fff4e5;
+  color: #c46a00;
+}
+
+.command-desc {
+  margin: 0.45rem 0 0;
+  color: var(--text-soft);
+}
+
+.command-tags {
+  margin-top: 0.55rem;
+  display: flex;
+  gap: 0.35rem;
+  flex-wrap: wrap;
+}
+
+.command-tags span,
+.command-usage {
+  display: inline-flex;
+  border: 1px solid var(--line);
+  border-radius: 9px;
+  background: var(--surface-2);
+  padding: 0.3rem 0.5rem;
+  font-size: 0.78rem;
+  color: var(--text-soft);
+}
+
+.command-usage {
+  margin-top: 0.55rem;
+}
+
+.command-paging {
+  margin-top: 0.9rem;
+  display: flex;
+  justify-content: space-between;
+  gap: 0.8rem;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.command-paging .pager {
+  display: inline-flex;
+  gap: 0.5rem;
+}
+
+.command-paging button {
+  border: 1px solid var(--line);
+  background: var(--surface);
+  color: var(--text);
+  border-radius: 10px;
+  padding: 0.5rem 0.75rem;
+  cursor: pointer;
+}
+
+.command-paging button:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+@media (max-width: 900px) {
+  .command-controls {
+    grid-template-columns: 1fr;
+  }
+}
+
+html[data-theme="dark"] .command-controls .premium-toggle.active {
+  border-color: rgba(11, 136, 255, 0.55);
+  background: rgba(11, 136, 255, 0.18);
+  color: #b9d6ff;
+}
+
+html[data-theme="dark"] .command-tier.free {
+  background: rgba(16, 185, 129, 0.18);
+  color: #74e7ba;
+}
+
+html[data-theme="dark"] .command-tier.premium {
+  background: rgba(249, 115, 22, 0.2);
+  color: #ffd0a8;
+}
