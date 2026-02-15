@@ -266,7 +266,26 @@ class MusicManager {
         const guild = this.client.guilds.cache.get(state.guildId);
         if (!guild) return null;
         return guild.channels.cache.get(state.voiceChannelId) || null;
-    }    async evaluateAutoPauseResume(guildId) {
+    }
+
+    async pickTextChannelIdForGuild(guild, preferredChannelId = null) {
+        if (!guild) return null;
+
+        if (preferredChannelId) {
+            const preferred = guild.channels.cache.get(preferredChannelId)
+                || await guild.channels.fetch(preferredChannelId).catch(() => null);
+            if (preferred?.isTextBased()) return preferred.id;
+        }
+
+        if (guild.systemChannel?.isTextBased()) return guild.systemChannel.id;
+
+        const fallback = guild.channels.cache.find((c) => c.isTextBased() && c.viewable);
+        if (fallback) return fallback.id;
+
+        return null;
+    }
+
+    async evaluateAutoPauseResume(guildId) {
         const state = this.states.get(guildId);
         if (!state?.player || !state.voiceChannelId) return;
 
@@ -306,27 +325,93 @@ class MusicManager {
         }
     }
 
+    async handle247ForceRejoin(guildId, previousVoiceChannelId = null, hintTextChannelId = null) {
+        const settings = await getGuild247Settings(guildId).catch(() => null);
+        if (!settings?.configured || !settings.enabled) return false;
+
+        if (!settings.premiumActive) {
+            await disableGuild247(guildId).catch(() => null);
+            if (hintTextChannelId) {
+                await this.sendContainer(hintTextChannelId, {
+                    title: "24/7 Disabled",
+                    description: "Premium expired. 24/7 mode has been turned off automatically."
+                }).catch(() => null);
+            }
+            return false;
+        }
+
+        const guild = this.client.guilds.cache.get(guildId)
+            || await this.client.guilds.fetch(guildId).catch(() => null);
+        if (!guild) return false;
+
+        const me = guild.members.me || await guild.members.fetchMe().catch(() => null);
+        if (me?.voice?.channelId) return false;
+
+        const targetVoiceId = settings.channelId || previousVoiceChannelId;
+        if (!targetVoiceId) return false;
+
+        const voice = guild.channels.cache.get(targetVoiceId)
+            || await guild.channels.fetch(targetVoiceId).catch(() => null);
+        if (!voice?.isVoiceBased?.()) return false;
+
+        const textChannelId = await this.pickTextChannelIdForGuild(
+            guild,
+            hintTextChannelId || this.states.get(guildId)?.textChannelId || null
+        );
+        if (!textChannelId) return false;
+
+        await this.create(
+            guildId,
+            voice.id,
+            textChannelId,
+            guild.shardId || 0,
+            settings.byUserId || null,
+            { forceReconnect: true, updateTextChannel: false }
+        ).catch(() => null);
+
+        const live = this.states.get(guildId);
+        if (!live?.voiceChannelId) return false;
+
+        await this.sendContainer(textChannelId, {
+            title: "24/7 Auto Reconnected",
+            description: `Bot rejoined <#${live.voiceChannelId}> because 24/7 mode is enabled.`
+        }).catch(() => null);
+
+        return true;
+    }
+
     updateVoiceState(oldState, newState) {
         const guildId = newState?.guild?.id || oldState?.guild?.id;
         if (!guildId) return;
 
-        const state = this.states.get(guildId);
-        if (!state) return;
-
         const oldChannelId = oldState?.channelId || null;
         const newChannelId = newState?.channelId || null;
         const changedUserId = newState?.id || oldState?.id;
+        const state = this.states.get(guildId);
 
         if (this.botUserId && changedUserId === this.botUserId) {
-            state.voiceChannelId = newChannelId || null;
+            const previousVoice = oldChannelId || state?.voiceChannelId || null;
+            const hintTextChannelId = state?.textChannelId || null;
+
+            if (state) {
+                state.voiceChannelId = newChannelId || null;
+            }
+
+            if (!newChannelId && previousVoice) {
+                setTimeout(() => {
+                    this.handle247ForceRejoin(guildId, previousVoice, hintTextChannelId).catch(() => null);
+                }, 1200);
+            }
         }
 
+        if (!state) return;
         if (oldChannelId !== state.voiceChannelId && newChannelId !== state.voiceChannelId) return;
 
         setTimeout(() => {
             this.evaluateAutoPauseResume(guildId).catch(() => null);
         }, 350);
     }
+
     warnOnce(key, message, ttlMs = 20000) {
         const now = Date.now();
         const at = this.warnAt.get(key) || 0;
@@ -458,10 +543,21 @@ class MusicManager {
 
     async create(guildId, voiceChannelId, textChannelId, shardId = 0, requesterId = null, options = {}) {
         let state = this.states.get(guildId);
+        const updateTextChannel = Boolean(options?.updateTextChannel);
+
         if (state) {
-            state.textChannelId = textChannelId;
-            state.voiceChannelId = voiceChannelId;
-            return state;
+            if (updateTextChannel && textChannelId) {
+                state.textChannelId = textChannelId;
+            }
+
+            const sameVoiceChannel = String(state.voiceChannelId || "") === String(voiceChannelId || "");
+            const hasLivePlayer = Boolean(state.player);
+            const needsReconnect = Boolean(options?.forceReconnect) || !hasLivePlayer || !sameVoiceChannel;
+
+            if (!needsReconnect) return state;
+
+            await this.cleanupGuild(guildId, true).catch(() => null);
+            state = null;
         }
 
         const usePremium = requesterId
@@ -507,6 +603,13 @@ class MusicManager {
         }
 
         return state;
+    }
+
+    setPlaybackTextChannel(guildId, textChannelId) {
+        const state = this.states.get(guildId);
+        if (!state || !textChannelId) return false;
+        state.textChannelId = textChannelId;
+        return true;
     }
 
     clearIdleDisconnectTimer(state) {
@@ -1687,20 +1790,3 @@ class MusicManager {
 }
 
 module.exports = { MusicManager };
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

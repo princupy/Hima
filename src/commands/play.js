@@ -207,9 +207,40 @@ module.exports = {
         const shardId = message.guild.shardId ?? 0;
 
         let state = bot.music.get(message.guild.id);
+        if (state) {
+            const activeVoiceId = state.voiceChannelId || message.guild.members.me?.voice?.channelId || null;
+            if (activeVoiceId && activeVoiceId !== voice.id) {
+                const canForceMove = await bot.music.hasPremiumAccess(message.author.id).catch(() => false);
+                if (!canForceMove) {
+                    await reply({
+                        title: "Voice Channel Mismatch",
+                        description: `I am already active in <#${activeVoiceId}>. Join that voice channel to control playback.`,
+                        footer: "Vote/Buy premium users can force-move bot using play"
+                    });
+                    return;
+                }
+
+                await bot.music.disconnect(message.guild.id).catch(() => null);
+                state = null;
+            } else {
+                bot.music.setPlaybackTextChannel(message.guild.id, message.channel.id);
+            }
+        }
+
+        if (state && (!state.player || !state.voiceChannelId)) {
+            state = null;
+        }
+
         if (!state) {
             try {
-                state = await bot.music.create(message.guild.id, voice.id, message.channel.id, shardId, message.author.id);
+                state = await bot.music.create(
+                    message.guild.id,
+                    voice.id,
+                    message.channel.id,
+                    shardId,
+                    message.author.id,
+                    { updateTextChannel: true, forceReconnect: true }
+                );
             } catch (error) {
                 const reason = String(error?.message || error);
                 if (/no lavalink node available/i.test(reason)) {
@@ -224,6 +255,8 @@ module.exports = {
                 return;
             }
         }
+
+        bot.music.setPlaybackTextChannel(message.guild.id, message.channel.id);
 
         const hadCurrentTrack = Boolean(state.current);
 

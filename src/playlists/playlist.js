@@ -127,10 +127,38 @@ async function loadPlaylistIntoQueue({ bot, message, playlist, tracks }) {
 
     const shardId = message.guild.shardId || 0;
     let state = bot.music.get(message.guild.id);
-    if (!state) {
-        state = await bot.music.create(message.guild.id, voice.id, message.channel.id, shardId, message.author.id);
+
+    if (state) {
+        const activeVoiceId = state.voiceChannelId || message.guild.members.me?.voice?.channelId || null;
+        if (activeVoiceId && activeVoiceId !== voice.id) {
+            const canForceMove = await bot.music.hasPremiumAccess(message.author.id).catch(() => false);
+            if (!canForceMove) {
+                throw new Error(`I am already active in <#${activeVoiceId}>. Join that voice channel first.`);
+            }
+
+            await bot.music.disconnect(message.guild.id).catch(() => null);
+            state = null;
+        } else {
+            bot.music.setPlaybackTextChannel(message.guild.id, message.channel.id);
+        }
     }
 
+    if (state && (!state.player || !state.voiceChannelId)) {
+        state = null;
+    }
+
+    if (!state) {
+        state = await bot.music.create(
+            message.guild.id,
+            voice.id,
+            message.channel.id,
+            shardId,
+            message.author.id,
+            { updateTextChannel: true, forceReconnect: true }
+        );
+    }
+
+    bot.music.setPlaybackTextChannel(message.guild.id, message.channel.id);
     let added = 0;
     let failed = 0;
     for (const t of tracks) {
@@ -732,7 +760,3 @@ module.exports = {
         return true;
     }
 };
-
-
-
-

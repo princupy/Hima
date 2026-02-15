@@ -204,6 +204,24 @@ function registerMessageCreateHandler(bot) {
             return;
         }
 
+        const state = bot.music.get(message.guild.id);
+        const userVoiceId = message.member?.voice?.channelId || null;
+        const isPlayLike = commandName === "play" || (commandName === "playlist" && String(args?.[0] || "").toLowerCase() === "load");
+
+        if (
+            state?.voiceChannelId &&
+            userVoiceId &&
+            userVoiceId !== state.voiceChannelId &&
+            isMusicCommand(commandName, args) &&
+            !isPlayLike
+        ) {
+            await reply({
+                title: "Voice Channel Mismatch",
+                description: `Bot is active in <#${state.voiceChannelId}>. Join same voice channel to use this command.`
+            });
+            return;
+        }
+
         try {
             await command.execute({
                 bot,
